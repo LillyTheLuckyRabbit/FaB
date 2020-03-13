@@ -1,0 +1,6 @@
+# File: .gitignore
+# Author: William Coar and David Butler
+# Description: Ignores compiled files when pushing to Github
+
+*.o
+*.so
