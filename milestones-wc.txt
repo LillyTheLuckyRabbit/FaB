@@ -3,7 +3,13 @@ Milestones / Rubric
 
 All milestones are not "in-lab" since we were finishing Project 4 during lab.
 
-10 points - Lazyfoo Tutorial (Lessons 1 through 45)
+2 points - Lazyfoo Tutorial (Lessons 1 through 10)
+
+2 points - Lazyfoo Tutorial (Lessons 11 through 20)
+
+3 points - Lazyfoo Tutorial (Lessons 21 through 31)
+
+3 points - Lazyfoo Tutorial (Lessons 32 through 45)
 
 3 points - Design document detailing the gameplay of the game and establishing scope
 
@@ -15,11 +21,13 @@ All milestones are not "in-lab" since we were finishing Project 4 during lab.
 
 8 points - Implement terrain, collision, and terrain generation
 
-5 points - Implement weapons. CONTEXT: the points assigned to this is for the work that will go into the
-initial implementation (a projectile system, particles for explosions, etc.). However, we will
-continue to add weapons until the deadline if we have time for the sake of gameplay.
+5 points - Implement weapons. CONTEXT: the points assigned to this is for the work that will go
+into the initial implementation (a projectile system, particles for explosions, etc.). However,
+we will continue to add weapons until the deadline if we have time for the sake of gameplay.
 
-6 points - Implement "Ninja Rope." CONTEXT: the original Liero has a grappling hook type item that
-we definitely want to add to our game. That being said, I'm assigning this task 6 points because
-implementing elastic physics and having it tether to things correctly seems like it would be
-difficult.
+6 points - Implement "Ninja Rope." CONTEXT: the original Liero has a grappling hook type item
+that we definitely want to add to our game. That being said, I'm assigning this task 6 points
+because implementing elastic physics and having it tether to things correctly seems like it
+would be difficult.
+
+UPDATED 2020-03-14T01:52:37-04:00
