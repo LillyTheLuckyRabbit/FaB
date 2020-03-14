@@ -1,0 +1,14 @@
+Time log for final project
+David Butler
+
+On 3/12, I spent 2 hours doing the following:
+	-Installing SDL onto Ubuntu (on Windows 10)
+	-Completing the first LazyFoo tutorial
+		-Not being able to compile the tutorial due to an error where the library sdL2 wasn't being found
+		-Scouring the internet to figure out why the library wasn't being found after installing
+		-Realizing that it wasn't found as I did "-lsdL2" and not "-lSDL2"
+		-Finally, I get to do the actual tutorial
+		-Actually completing the first tutorial
+	-Completing the second tutorial
+		-Aside from figuring out where the .bmp file needed to be for it to load, I completed the second tutorial without a hitch.
+	-Not exactly a graceful start, but now I won't need to go through the pain of getting a bunch of SDL stuff installed... Er, for now, anyways.
