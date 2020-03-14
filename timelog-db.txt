@@ -18,7 +18,7 @@ On 3/12, I spent 2 hours doing the following:
 		-Aside from figuring out where the .bmp file needed to be for it to load, I completed the second tutorial without a hitch.
 	-Not exactly a graceful start, but now I won't need to go through the pain of getting a bunch of SDL stuff installed... Er, for now, anyways.
 
-On 3/14, I spent X hours doing the following:
+On 3/14, I spent 2 hours and 30 minutes doing the following:
 	-Updating timelog, milestones, and prepwork
 	-Completing writeup for Challenge7
 	-Attempting to fix a weird issue
@@ -29,4 +29,4 @@ On 3/14, I spent X hours doing the following:
 		-
 	-Created some mock-up sprites for the characters
 	-Created a mock-up to determine if the sprites would be big enough for the current screen resolution and 4 player split-screen.
-		-Mock-up images can be found in the folder, "db-mockups"
+		-Mock-up images can be found in the folder, "db-mockups" (found under the "prep_butler" folder).
