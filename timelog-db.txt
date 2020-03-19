@@ -1,0 +1,32 @@
+Time log for final project
+David Butler
+
+On 3/2 (lab), Will and I spent (unsure about the exact time) doing the following:
+	-Creating project proposal
+	-Brainstorming potential uses for data structures
+	-Brainstorming other mechanics such as a weapons system
+
+On 3/12, I spent 2 hours doing the following:
+	-Installing SDL onto Ubuntu (on Windows 10)
+	-Completing the first LazyFoo tutorial
+		-Not being able to compile the tutorial due to an error where the library sdL2 wasn't being found
+		-Scouring the internet to figure out why the library wasn't being found after installing
+		-Realizing that it wasn't found as I did "-lsdL2" and not "-lSDL2"
+		-Finally, I get to do the actual tutorial
+		-Actually completing the first tutorial
+	-Completing the second tutorial
+		-Aside from figuring out where the .bmp file needed to be for it to load, I completed the second tutorial without a hitch.
+	-Not exactly a graceful start, but now I won't need to go through the pain of getting a bunch of SDL stuff installed... Er, for now, anyways.
+
+On 3/14, I spent 2 hours and 30 minutes doing the following:
+	-Updating timelog, milestones, and prepwork
+	-Completing writeup for Challenge7
+	-Attempting to fix a weird issue
+		-"error: XDG_RUNTIME_DIR not set in the environment.
+		SDL could not initialize! SDL_Error: No available video device"
+		-Occurs whenever I attempt to run any of the SDL tutorials
+		-Did not happen yesterday... Weird.
+		-
+	-Created some mock-up sprites for the characters
+	-Created a mock-up to determine if the sprites would be big enough for the current screen resolution and 4 player split-screen.
+		-Mock-up images can be found in the folder, "db-mockups" (found under the "prep_butler" folder).
