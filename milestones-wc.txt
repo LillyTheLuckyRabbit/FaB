@@ -3,13 +3,19 @@ Milestones / Rubric
 
 All milestones are not "in-lab" since we were finishing Project 4 during lab.
 
-2 points - Lazyfoo Tutorial (Lessons 1 through 10)
+2 points - Lazy Foo Tutorial (Lessons 1 through 10)
 
-2 points - Lazyfoo Tutorial (Lessons 11 through 20)
+2 points - Lazy Foo Tutorial (Lessons 11 through 20)
 
-3 points - Lazyfoo Tutorial (Lessons 21 through 31)
+3 points - Lazy Foo Tutorial (Lessons 21 through 31)
 
-3 points - Lazyfoo Tutorial (Lessons 32 through 45)
+3 points - Lazy Foo Tutorial (Lessons 32 through 45)
+
+NOTE: For the Lazy Foo tutorials, I am skipping lesson 16, 22 through 25, 34, and 44. The reason
+for skipping 16 is because for the final project, I am going to be using a sprite sheet instead
+of TTF fonts. The reason I am skipping 22 through 25 and 44 is because I already familiarized
+myself with SDL's "SDL_GetTicks" function and implemented delta frames in my compilable task.
+I'm skipping 34 because I don't have a microphone to test it.
 
 3 points - Design document detailing the gameplay and scope
 
