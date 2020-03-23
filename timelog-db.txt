@@ -26,7 +26,14 @@ On 3/14, I spent 2 hours and 30 minutes doing the following:
 		SDL could not initialize! SDL_Error: No available video device"
 		-Occurs whenever I attempt to run any of the SDL tutorials
 		-Did not happen yesterday... Weird.
-		-
 	-Created some mock-up sprites for the characters
 	-Created a mock-up to determine if the sprites would be big enough for the current screen resolution and 4 player split-screen.
 		-Mock-up images can be found in the folder, "db-mockups" (found under the "prep_butler" folder).
+
+On 3/22-3/23, I spent 1 hour and 45 minutes doing the following:
+	-Reinstalling SDL via minGW on the windows 10 command prompt (SDL on Ubuntu failed to work)
+		-Tutorial used: https://www.youtube.com/watch?v=ybYMOKEW9IY
+		-I had some issues with #include <SDL2/SDL.h> not working and make not being found
+			-I eventually solved it by downloading more packages on the MinGW installer
+		-I got the first LazyFoo tutorial to successfully compile and run (again)!
+	-Updated time log
