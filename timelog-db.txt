@@ -37,3 +37,8 @@ On 3/22-3/23, I spent 1 hour and 45 minutes doing the following:
 			-I eventually solved it by downloading more packages on the MinGW installer
 		-I got the first LazyFoo tutorial to successfully compile and run (again)!
 	-Updated time log
+	
+From 3/25-3/27, I spent 4 hours and 45 minutes doing the following
+	-Completed LazyFoo SDL tutorials 1-41 (Fortunately it's much faster now that I have MinGW working)
+		-Skipped tutorials 10, 20, 24, 25, 34, 36, 37, and 42, as they were irrelevant to our final project
+	-Updated time log
