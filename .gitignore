@@ -7,4 +7,5 @@
 *.so
 *.dll
 *.exe
+*.elf
 /prep_coar/ball
