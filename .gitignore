@@ -5,4 +5,6 @@
 .vscode
 *.o
 *.so
+*.dll
+*.exe
 /prep_coar/ball
