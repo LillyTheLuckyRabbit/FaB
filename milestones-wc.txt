@@ -11,14 +11,6 @@ All milestones are not "in-lab" since we were finishing Project 4 during lab.
 
 3 points - Lazy Foo Tutorial (Lessons 32 through 45)
 
-NOTE: For the Lazy Foo tutorials, I am skipping lesson 16, 22 through 25, 28, 34, and 44. The
-reason for skipping 16 is because for the final project, I am going to be using a sprite sheet
-instead of TTF fonts. The reason I am skipping 22 through 25 and 44 is because I already
-familiarized myself with SDL's "SDL_GetTicks" function and implemented delta frames in my
-compilable task. I am skipping 28 because while I am using per-pixel collision for the terrain, 
-I am not going to use bounding boxes to calculate the collision. I'm skipping 34 because I don't
-have a microphone to test it.
-
 3 points - Design document detailing the gameplay and scope
 
 1 point - Get 4 Xinput controllers detected and working
