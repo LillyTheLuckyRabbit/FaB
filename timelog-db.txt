@@ -42,3 +42,14 @@ From 3/25-3/27, I spent 4 hours and 45 minutes doing the following
 	-Completed LazyFoo SDL tutorials 1-41 (Fortunately it's much faster now that I have MinGW working)
 		-Skipped tutorials 10, 20, 24, 25, 34, 36, 37, and 42, as they were irrelevant to our final project
 	-Updated time log
+
+From 4/4-4/5, I spent ~2 hours and 30 minutes doing the following
+	-Modifying Will's bouncing ball test
+		-Adding particles whenever the ball hits the ground fast enough
+			-My implementation compiled but was kinda sloppy, particles didn't work.
+		-Fixing a physics calculation bug that occurs whenever the game screen is moved
+			-Moving the screen causes the game to mess up the ball's Y velocity due to the game's timer being updated but everything else paused
+			-I attempted to solve this by using window events to pause the game. No dice.
+			-Instead, I found a solution from: https://www.gamedev.net/forums/topic/527683-sdl-dragging-window-problem/
+				-Adding a max for the delta time fixes the bug, neat!
+	
