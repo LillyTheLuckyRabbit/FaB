@@ -9,10 +9,18 @@ OBJECTS=	$(SOURCES:.cpp=.o)
 EXT=		.elf
 
 ifeq ($(OS),Windows_NT)
-	EXT= .exe
-	CXXFLAGS= -IC:\Development\include\SDL2 -g -Wall -std=gnu++11 -Wl,-subsystem,windows
-	LDFLAGS= -LC:\Development\lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer
-endif
+EXT= .exe
+INCLUDE_PATHS = -IC:\Development\include\SDL2
+LIBRARY_PATHS = -LC:\Development\lib
+CXXFLAGS = -w -Wl,-subsystem,windows
+LDFLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
+#-lSDL2_ttf
+#-lSDL2_mixer
+
+all: $(SOURCES)
+	$(CXX) $(SOURCES) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(CXXFLAGS) $(LDFLAGS) -o $(PROGRAMS)
+	
+else
 
 all:		$(PROGRAMS)
 
@@ -24,4 +32,5 @@ fab:	$(OBJECTS)
 
 clean:
 	rm -f $(PROGRAMS)$(EXT) $(OBJECTS)
+endif
 
