@@ -1,4 +1,4 @@
 Testing!
-Velocity: -37.278000, Ball X: 270, Ball Y: 367
-Velocity: -19.521898, Ball X: 270, Ball Y: 374
-Velocity: -11.624851, Ball X: 270, Ball Y: 380
+Velocity: -36.885612, Ball X: 270, Ball Y: 375
+Velocity: -19.031397, Ball X: 270, Ball Y: 379
+Velocity: -10.202399, Ball X: 270, Ball Y: 380

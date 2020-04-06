@@ -1,34 +1,26 @@
-#Copyright Notice:
-#The files within this zip file are copyrighted by Lazy Foo' Productions (2004-2014)
-#and may not be redistributed without written permission.
+CXX=		g++
+CXXFLAGS=	-g -Wall -std=gnu++11
+LDFLAGS=	-lSDL2 -lSDL2_image -lSDL2_mixer
+SHELL=		bash
+PROGRAMS=	ball
+SOURCES=	ball.cpp
+HEADERS=	
+OBJECTS=	$(SOURCES:.cpp=.o)
+EXT=		.elf
 
-#OBJS specifies which files to compile as part of the project
-OBJS = ball.cpp
+ifeq ($(OS),Windows_NT)
+	EXT= .exe
+	CXXFLAGS= -IC:\Development\include\SDL2 -g -Wall -std=gnu++11 -Wl,-subsystem,windows
+	LDFLAGS= -LC:\Development\lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer
+endif
 
-#CC specifies which compiler we're using
-CC = g++
+all:		$(PROGRAMS)
 
-#INCLUDE_PATHS specifies the additional include paths we'll need
-INCLUDE_PATHS = -IC:\Development\include\SDL2
+%.o:		%.cpp $(HEADERS)
+	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
-#LIBRARY_PATHS specifies the additional library paths we'll need
-LIBRARY_PATHS = -LC:\Development\lib
+ball:	$(OBJECTS)
+	$(CXX) $(LDFLAGS) -o $@$(EXT) $(OBJECTS)
 
-#COMPILER_FLAGS specifies the additional compilation options we're using
-# -w suppresses all warnings
-# -Wl,-subsystem,windows gets rid of the console window
-COMPILER_FLAGS = -w -Wl,-subsystem,windows
-
-#LINKER_FLAGS specifies the libraries we're linking against
-LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
-
-#-lSDL2_ttf
-
-#-lSDL2_mixer
-
-#OBJ_NAME specifies the name of our exectuable
-OBJ_NAME = SDL_Executable
-
-#This is the target that compiles our executable
-all : $(OBJS)
-	$(CC) $(OBJS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(OBJ_NAME)
+clean:
+	rm -f $(PROGRAMS)$(EXT) $(OBJECTS)

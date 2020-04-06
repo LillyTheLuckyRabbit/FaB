@@ -1,6 +1,11 @@
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	#include <SDL.h>
+	#include <SDL_image.h>
+#else
+	#include <SDL2/SDL.h>
+	#include <SDL2/SDL_image.h>
+#endif
 
-#include <SDL.h>
-#include <SDL_image.h>
 #include <iostream>
 #include <math.h>
 
