@@ -13,12 +13,11 @@ EXT= .exe
 INCLUDE_PATHS = -IC:\Development\include\SDL2
 LIBRARY_PATHS = -LC:\Development\lib
 CXXFLAGS = -w -Wl,-subsystem,windows
-LDFLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image
+LDFLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer
 #-lSDL2_ttf
-#-lSDL2_mixer
 
 all: $(SOURCES)
-	$(CXX) $(SOURCES) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(CXXFLAGS) $(LDFLAGS) -o $(PROGRAMS)
+	$(CXX) $(SOURCES) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(CXXFLAGS) $(LDFLAGS) -o $(PROGRAMS)$(EXT)
 	
 else
 
