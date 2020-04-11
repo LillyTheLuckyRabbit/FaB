@@ -1,18 +1,144 @@
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-	#include <SDL.h>
-	#include <SDL_image.h>
-	#include <SDL_mixer.h>
-#else
-	#include <SDL2/SDL.h>
-	#include <SDL2/SDL_image.h>
-	#include <SDL2/SDL_mixer.h>
-#endif
+/* File: main.cpp
+ * Authors: David Butler and William Coar
+ * Description: Entry point for the game
+*/
 
-#include <iostream>
+#include <vector>
 
-using namespace std;
+#include "common.h"
+#include "constants.h"
+#include "deltaclock.h"
+#include "player.h"
+#include "texture.h"
 
-int main(int argc, char *argv[]) {
-	cout << "makefile test" << endl;
-	return 1;
+using std::cin;
+using std::cout;
+using std::endl;
+using std::string;
+using std::vector;
+
+// Globals
+SDL_Window* gameWindow = NULL;
+SDL_Renderer* gameRenderer = NULL;
+DeltaClock frameTimer;
+
+bool initSdlWindow() {
+	bool success = true;
+	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0) {
+		cout << "SDL could not initialize! SDL_Error: " << SDL_GetError() << endl;
+		success = false;
+	} else {
+		gameWindow = SDL_CreateWindow("FaB", SDL_WINDOWPOS_UNDEFINED,
+		                              SDL_WINDOWPOS_UNDEFINED, RENDER_WIDTH, RENDER_HEIGHT, SDL_WINDOW_SHOWN);
+		if(gameWindow == NULL) {
+			cout << "Window could not be created! SDL_Error: " << SDL_GetError() << endl;
+		} else {
+			gameRenderer = SDL_CreateRenderer(gameWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+			if(gameRenderer == NULL) {
+				cout << "Renderer could not be created! SDL Error: " << SDL_GetError() << endl;
+				success = false;
+			}
+			SDL_SetRenderDrawColor(gameRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+			int imgFlags = IMG_INIT_PNG;
+			if(!(IMG_Init(imgFlags) & imgFlags)) {
+				cout << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << endl;
+				success = false;
+			}
+			if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+				cout << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << endl;
+				success = false;
+			}
+		}
+	}
+	return (success);
+}
+
+void closeSdlWindow() {
+	SDL_DestroyRenderer(gameRenderer);
+	SDL_DestroyWindow(gameWindow);
+	gameWindow = NULL;
+	gameRenderer = NULL;
+
+	//Mix_Quit();
+	IMG_Quit();
+	SDL_Quit();
+}
+
+int main(int argc, char* argv[]) {
+	int numPlayers = 0;
+	while(numPlayers < 2 || numPlayers > 4) {
+		cout << "How many players do you have? (2-4)" << endl;
+		cin >> numPlayers;
+	}
+
+	if(!initSdlWindow()) return (1);
+	if(SDL_NumJoysticks() < numPlayers) {
+		cout << "You don't have enough controllers connected." << endl;
+		cout << "EXPECTED: " << numPlayers << " GOT: " << SDL_NumJoysticks() << endl;
+		cout << "TODO: We need to add support for hotplugging controllers." << endl;
+		return (1);
+	}
+
+	Player* players[4];
+	for(int i = 0; i < numPlayers; i++) {
+		players[i] = new Player(i + 1);
+		if(numPlayers > 2) players[i]->halveCameraHeight();
+	}
+
+	vector<SDL_Rect> viewports;
+	if(numPlayers == 2) {
+		viewports.push_back({0, 0, RENDER_WIDTH / 2, RENDER_HEIGHT});
+		viewports.push_back({RENDER_WIDTH / 2, 0, RENDER_WIDTH / 2, RENDER_HEIGHT});
+	} else {
+		viewports.push_back({0, 0, RENDER_WIDTH / 2, RENDER_HEIGHT / 2});
+		viewports.push_back({RENDER_WIDTH / 2, 0, RENDER_WIDTH / 2, RENDER_HEIGHT / 2});
+		viewports.push_back({0, RENDER_HEIGHT / 2, RENDER_WIDTH / 2, RENDER_HEIGHT / 2});
+		viewports.push_back({RENDER_WIDTH / 2, RENDER_HEIGHT / 2, RENDER_WIDTH / 2, RENDER_HEIGHT / 2});
+	}
+
+	bool quit = false;
+	SDL_Event e;
+	SDL_Rect currentCamera;
+
+	while(!quit) {
+		frameTimer.newFrame();
+		while(SDL_PollEvent(&e) != 0) {
+			if(e.type == SDL_QUIT) {
+				quit = true;
+			} else if(e.type == SDL_JOYAXISMOTION) {
+				if(e.jaxis.axis == 0) {
+					players[e.jaxis.which]->handleEvent(e);
+				}
+			} else if(e.type == SDL_JOYHATMOTION) {
+				// STUB
+			} else if(e.type == SDL_JOYBUTTONDOWN) {
+				// STUB
+			} else if(e.type == SDL_JOYBUTTONUP) {
+				// STUB
+			}
+		}
+
+		SDL_SetRenderDrawColor(gameRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_RenderClear(gameRenderer);
+
+		for(int i = 0; i < numPlayers; i++) {
+			SDL_RenderSetClipRect(gameRenderer, &viewports[i]);
+			currentCamera = players[i]->getCamera();
+			for(int e = 0; e < numPlayers; e++) {
+				if(players[e]->getX() - currentCamera.x < currentCamera.w && players[e]->getX() - currentCamera.x > 0) {
+					if(players[e]->getY() - currentCamera.y < currentCamera.h && players[e]->getY() - currentCamera.y > 0) {
+						players[e]->render(currentCamera.x, currentCamera.y, viewports[i].x, viewports[i].y);
+					}
+				}
+			}
+		}
+
+		SDL_RenderPresent(gameRenderer);
+	}
+
+	for(int i = 0; i < numPlayers; i++) {
+		delete players[i];
+	}
+	closeSdlWindow();
+	return (0);
 }

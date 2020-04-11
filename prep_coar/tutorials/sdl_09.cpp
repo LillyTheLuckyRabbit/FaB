@@ -7,8 +7,8 @@ using std::cin;
 using std::endl;
 using std::string;
 
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+const int RENDER_WIDTH = 640;
+const int RENDER_HEIGHT = 480;
 
 bool initSdlWindow(SDL_Window* &gWindow, SDL_Renderer* &gRenderer) {
 	bool success = true;
@@ -17,7 +17,7 @@ bool initSdlWindow(SDL_Window* &gWindow, SDL_Renderer* &gRenderer) {
 		success = false;
 	} else {
 		gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+			SDL_WINDOWPOS_UNDEFINED, RENDER_WIDTH, RENDER_HEIGHT, SDL_WINDOW_SHOWN);
 		if(gWindow == NULL) {
 			cout << "Window could not be created! SDL_Error: " << SDL_GetError() << endl; 
 		} else {
@@ -71,20 +71,20 @@ int main(int argc, char *argv[]) {
 	SDL_Rect topLeftViewport;
     topLeftViewport.x = 0;
     topLeftViewport.y = 0;
-    topLeftViewport.w = SCREEN_WIDTH / 2;
-    topLeftViewport.h = SCREEN_HEIGHT / 2;
+    topLeftViewport.w = RENDER_WIDTH / 2;
+    topLeftViewport.h = RENDER_HEIGHT / 2;
 
 	SDL_Rect topRightViewport;
-    topRightViewport.x = SCREEN_WIDTH / 2;
+    topRightViewport.x = RENDER_WIDTH / 2;
     topRightViewport.y = 0;
-    topRightViewport.w = SCREEN_WIDTH / 2;
-    topRightViewport.h = SCREEN_HEIGHT / 2;
+    topRightViewport.w = RENDER_WIDTH / 2;
+    topRightViewport.h = RENDER_HEIGHT / 2;
 
 	SDL_Rect bottomViewport;
     bottomViewport.x = 0;
-    bottomViewport.y = SCREEN_HEIGHT / 2;
-    bottomViewport.w = SCREEN_WIDTH;
-    bottomViewport.h = SCREEN_HEIGHT / 2;
+    bottomViewport.y = RENDER_HEIGHT / 2;
+    bottomViewport.w = RENDER_WIDTH;
+    bottomViewport.h = RENDER_HEIGHT / 2;
     SDL_RenderSetViewport( gRenderer, &bottomViewport );
 
 

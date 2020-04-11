@@ -22,3 +22,9 @@
 
 2020-03-31
 15:30 - 16:30 - Worked on group progress report 1
+
+2020-04-07
+16:00 - 18:00 - Helped David fix the Makefile for Windows
+
+2020-04-11
+21:00 - 02:00 - Began prototyping
