@@ -19,6 +19,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
+#include <stdio.h>
 
 using std::cin;
 using std::cout;

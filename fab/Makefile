@@ -17,8 +17,7 @@ LDFLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer
 #-lSDL2_ttf
 
 all: $(SOURCES)
-	$(CXX) $(SOURCES) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(CXXFLAGS) $(LDFLAGS) -o $(PROGRAMS)$(EXT)
-	
+	$(CXX) $(SOURCES) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(CXXFLAGS) $(LDFLAGS) -o $(PROGRAMS)
 else
 
 all:		$(PROGRAMS)
