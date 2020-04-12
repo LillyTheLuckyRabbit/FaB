@@ -49,6 +49,11 @@ void Player::handleEvent(const SDL_Event& e) {
 	if(posX - camera.x > 2 * (camera.w / 3) && camera.x < (LEVEL_WIDTH - camera.w - 100)) {
 		camera.x += 100;
 	}
+	//Keep the player's position in bounds
+	if (posX > LEVEL_WIDTH) posX = LEVEL_WIDTH;
+	if (posY > LEVEL_HEIGHT) posY = LEVEL_HEIGHT;
+	if (posX < 0) posX = 0;
+	if (posY < 0) posY = 0;
 }
 
 void Player::render(int camX, int camY, int vX, int vY) {
