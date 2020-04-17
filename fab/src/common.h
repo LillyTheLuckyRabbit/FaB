@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
+#include <algorithm>	//min/max functions
 
 using std::cin;
 using std::cout;

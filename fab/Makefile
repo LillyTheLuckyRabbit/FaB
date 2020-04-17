@@ -3,8 +3,8 @@ CXXFLAGS=	-g -Wall -std=gnu++11
 LDFLAGS=	-lSDL2 -lSDL2_image -lSDL2_mixer
 SHELL=		bash
 PROGRAMS=	fab
-SOURCES=	src/main.cpp src/texture.cpp src/deltaclock.cpp src/player.cpp
-HEADERS=	src/main.h src/constants.h src/common.h src/texture.h src/deltaclock.h src/player.h
+SOURCES=	src/main.cpp src/texture.cpp src/deltaclock.cpp src/player.cpp src/bullet.cpp
+HEADERS=	src/main.h src/constants.h src/common.h src/texture.h src/deltaclock.h src/player.h src/bullet.h
 OBJECTS=	$(SOURCES:.cpp=.o)
 EXT=		.elf
 
