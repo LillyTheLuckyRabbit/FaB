@@ -8,7 +8,7 @@
 
 Player::Player(int num) {
 	playerNumber = num;
-	controllerPtr = SDL_JoystickOpen(playerNumber - 1);
+	controllerPtr = SDL_GameControllerOpen(playerNumber - 1);
 
 	width = 29;
 	height = 29;
@@ -32,7 +32,7 @@ Player::Player(int num) {
 }
 
 Player::~Player() {
-	SDL_JoystickClose(controllerPtr);
+	SDL_GameControllerClose(controllerPtr);
 	controllerPtr = NULL;
 }
 

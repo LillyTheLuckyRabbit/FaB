@@ -22,12 +22,9 @@ SDL_Window* gameWindow = NULL;
 SDL_Renderer* gameRenderer = NULL;
 DeltaClock frameTimer;
 
-
-
 bool initSdlWindow() {
-	
 	bool success = true;
-	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0) {
+	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
 		cout << "SDL could not initialize! SDL_Error: " << SDL_GetError() << endl;
 		success = false;
 	} else {
@@ -69,8 +66,10 @@ void closeSdlWindow() {
 
 int main(int argc, char* argv[]) {
 	int numPlayers = 0;
-	freopen("debug.txt","w",stdout);
+	#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	freopen("debug.txt", "w", stdout);
 	printf("Testing!\n");
+	#endif
 	while(numPlayers < 2 || numPlayers > 4) {
 		cout << "How many players do you have? (2-4)" << endl;
 		cin >> numPlayers;
@@ -104,32 +103,28 @@ int main(int argc, char* argv[]) {
 	bool quit = false;
 	SDL_Event e;
 	SDL_Rect currentCamera;
-	
+
 	int backgroundX = 334;
 	int backgroundY = 219;
 	int backPosX = 100;
 	int backPosY = 10;
 	TextureWrapper backGroundTexture;
-	if(!backGroundTexture.loadFromFile("sprites/squidward_bg.jpg")){
+	if(!backGroundTexture.loadFromFile("sprites/squidward_bg.jpg")) {
 		cout << "Background texture failed to load!\n";
 	}
-	
-	
-	
+
 	while(!quit) {
 		frameTimer.newFrame();
 		while(SDL_PollEvent(&e) != 0) {
 			if(e.type == SDL_QUIT) {
 				quit = true;
-			} else if(e.type == SDL_JOYAXISMOTION) {
-				if(e.jaxis.axis == 0) {
-					players[e.jaxis.which]->handleEvent(e);
+			} else if(e.type == SDL_CONTROLLERAXISMOTION) {
+				if(e.caxis.axis ==SDL_CONTROLLER_AXIS_LEFTX) {
+					players[e.caxis.which]->handleEvent(e);
 				}
-			} else if(e.type == SDL_JOYHATMOTION) {
+			} else if(e.type == SDL_CONTROLLERBUTTONDOWN) {
 				// STUB
-			} else if(e.type == SDL_JOYBUTTONDOWN) {
-				// STUB
-			} else if(e.type == SDL_JOYBUTTONUP) {
+			} else if(e.type == SDL_CONTROLLERBUTTONUP) {
 				// STUB
 			}
 		}
@@ -137,8 +132,6 @@ int main(int argc, char* argv[]) {
 		SDL_SetRenderDrawColor(gameRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gameRenderer);
 
-
-		
 		for(int i = 0; i < numPlayers; i++) {
 			SDL_RenderSetClipRect(gameRenderer, &viewports[i]);
 			currentCamera = players[i]->getCamera();
@@ -152,7 +145,7 @@ int main(int argc, char* argv[]) {
 		}
 		backGroundTexture.render(backPosX - currentCamera.x, backPosY - currentCamera.y);
 		SDL_RenderPresent(gameRenderer);
-		backPosX+= 1;
+		backPosX += 1;
 	}
 
 	for(int i = 0; i < numPlayers; i++) {
