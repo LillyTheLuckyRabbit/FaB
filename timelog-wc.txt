@@ -28,3 +28,6 @@
 
 2020-04-10
 21:00 - 02:00 - Began prototyping
+
+2020-04-11
+19:15 - 20:15 - Created functions for vector trigonometry

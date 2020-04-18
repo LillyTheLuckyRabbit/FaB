@@ -3,6 +3,10 @@
  * Description: Constants used in the game
 */
 
+// ALSO TO NOTE:
+// https://wiki.libsdl.org/SDL_GameControllerAxis
+// https://wiki.libsdl.org/SDL_GameControllerButton
+
 #ifndef CONSTANTS_H
 #define CONSTANT_H
 

@@ -53,3 +53,18 @@ From 4/4-4/5, I spent ~2 hours and 30 minutes doing the following
 			-Instead, I found a solution from: https://www.gamedev.net/forums/topic/527683-sdl-dragging-window-problem/
 				-Adding a max for the delta time fixes the bug, neat!
 	
+On 4/11, I spent 3ish hours doing the following
+	-Getting the "first draft" of the final project to compile
+		-I had to use "Get-Content input.txt | ./fab.exe > output.txt" in windows power shell in order to get it to run fine
+	-Examining the code for rendering and creating a background texture
+		-I attempted to use the rendering code for the players as a base
+			-I couldn't get the background to render... Spoot.
+			-There are still a few issues with rendering in any case. Ah well, progress is being made nonetheless!
+	-Added code to prevent players from moving out of bounds of the level (to make troubleshooting the rendering easier)
+
+On 4/12, I spent (unsure of the exact time, about 0.5-1 hours?) doing the following:
+	-Creating sprites for FAB (Fun and Balanced)
+		-Began making player sprites
+			-Ended up messing up the dimensions, I'll have to come back to them later :/
+		-Created a sprite for dirt terrain
+			-I may still to tweak it to make it tile better, but this is fine for demo purposes.
