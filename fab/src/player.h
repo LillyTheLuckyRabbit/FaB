@@ -29,7 +29,7 @@ class Player {
 	int width;
 	int height;
 
-	SDL_Joystick* controllerPtr;
+	SDL_GameController* controllerPtr;
 
 	SDL_Rect camera;
 
