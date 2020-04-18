@@ -31,3 +31,6 @@
 
 2020-04-11
 19:15 - 20:15 - Created functions for vector trigonometry
+
+2020-04-17
+21:30 - 22:30 - Migrated from using SDL_Joystick to SDL_GameController
