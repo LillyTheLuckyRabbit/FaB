@@ -21,9 +21,9 @@ Player::Player(int num) {
 	if(camera.x < 0) {
 		camera.x = 0;
 	}
-	camera.y = posY + RENDER_HEIGHT / 4;
-	if(camera.y > LEVEL_HEIGHT - camera.h) {
-		camera.y = LEVEL_HEIGHT - camera.h;
+	camera.y = posY - RENDER_HEIGHT / 4;
+	if(camera.y < 0) {
+		camera.y = 0;
 	}
 
 	if(!playerTexture.loadFromFile("sprites/testpill.png")) {
@@ -31,23 +31,29 @@ Player::Player(int num) {
 	}
 }
 
-Player::~Player() {
-	SDL_GameControllerClose(controllerPtr);
+Player::Player() {
 	controllerPtr = NULL;
 }
 
+Player::~Player() {
+	if(controllerPtr) {
+		SDL_GameControllerClose(controllerPtr);
+		controllerPtr = NULL;
+	}
+}
+
 void Player::handleEvent(const SDL_Event& e) {
-	if(e.jaxis.value > 0) {
-		posX += 100;
+	if(e.caxis.value > 0) {
+		posX += 10;
 	}
-	if(e.jaxis.value < 0) {
-		posX -= 100;
+	if(e.caxis.value < 0) {
+		posX -= 10;
 	}
-	if(posX - camera.x < camera.w / 3 && camera.x > 100) {
-		camera.x -= 100;
+	if(posX - camera.x < camera.w / 6 && camera.x > 0) {
+		camera.x -= 10;
 	}
-	if(posX - camera.x > 2 * (camera.w / 3) && camera.x < (LEVEL_WIDTH - camera.w - 100)) {
-		camera.x += 100;
+	if(posX - camera.x > 5 * (camera.w / 6) && camera.x < LEVEL_WIDTH) {
+		camera.x += 10;
 	}
 	//Keep the player's position in bounds
 	if (posX > LEVEL_WIDTH) posX = LEVEL_WIDTH;
@@ -63,7 +69,7 @@ void Player::render(int camX, int camY, int vX, int vY) {
 void Player::halveCameraHeight() {
 	camera.h = RENDER_HEIGHT / 2;
 	camera.y = posY + RENDER_HEIGHT / 8;
-	if(camera.y > LEVEL_HEIGHT - camera.h) {
+	if(camera.y < LEVEL_HEIGHT - camera.h) {
 		camera.y = LEVEL_HEIGHT - camera.h;
 	}
 }

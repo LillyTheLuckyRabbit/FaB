@@ -1,6 +1,6 @@
 /* File: main.cpp
  * Authors: David Butler and William Coar
- * Description: Entry point for the game
+ * Description: Entry point and main loop for the game
 */
 
 #include <vector>
@@ -59,7 +59,7 @@ void closeSdlWindow() {
 	gameWindow = NULL;
 	gameRenderer = NULL;
 
-	//Mix_Quit();
+	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }
@@ -83,6 +83,7 @@ int main(int argc, char* argv[]) {
 		return (1);
 	}
 
+	srand(time(NULL));
 	Player* players[4];
 	for(int i = 0; i < numPlayers; i++) {
 		players[i] = new Player(i + 1);
@@ -109,7 +110,7 @@ int main(int argc, char* argv[]) {
 	int backPosX = 100;
 	int backPosY = 10;
 	TextureWrapper backGroundTexture;
-	if(!backGroundTexture.loadFromFile("sprites/squidward_bg.jpg")) {
+	if(!backGroundTexture.loadFromFile("sprites/squidward_bg.png")) {
 		cout << "Background texture failed to load!\n";
 	}
 
@@ -142,8 +143,8 @@ int main(int argc, char* argv[]) {
 					}
 				}
 			}
+			backGroundTexture.render(backPosX - currentCamera.x, backPosY - currentCamera.y);
 		}
-		backGroundTexture.render(backPosX - currentCamera.x, backPosY - currentCamera.y);
 		SDL_RenderPresent(gameRenderer);
 		backPosX += 1;
 	}
@@ -151,7 +152,10 @@ int main(int argc, char* argv[]) {
 	for(int i = 0; i < numPlayers; i++) {
 		delete players[i];
 	}
+	backGroundTexture.free();
 	closeSdlWindow();
+	#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 	fclose(stdout);
+	#endif
 	return (0);
 }

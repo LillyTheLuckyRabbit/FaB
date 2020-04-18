@@ -34,3 +34,6 @@
 
 2020-04-17
 21:30 - 22:30 - Migrated from using SDL_Joystick to SDL_GameController
+
+2020-04-18
+14:30 - 17:00 - Fixed rendering and camera system

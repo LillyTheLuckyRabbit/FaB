@@ -8,6 +8,7 @@
 class Player {
 	public:
 	Player(int num);
+	Player();
 	~Player();
 
 	SDL_Rect getCamera() { return camera; }
@@ -17,8 +18,10 @@ class Player {
 
 	void render(int camX, int camY, int vX, int vY);
 
-	int getX() { return posX; }
-	int getY() { return posY; }
+	int getX() const { return posX; }
+	int getY() const { return posY; }
+	int getW() const { return width; }
+	int getH() const { return height; }
 
 	private:
 	int playerNumber;
