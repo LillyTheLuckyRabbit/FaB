@@ -22,12 +22,15 @@ class Player {
 
 	void update(int deltaTime);
 
-	void render(int camX, int camY, int vX, int vY);
+	void render(int camX, int camY, int vX, int vY, bool cross);
 
 	int getX() const { return posX; }
 	int getY() const { return posY; }
 	int getW() const { return width; }
 	int getH() const { return height; }
+
+	int getScore() const { return score; }
+	int getHealth() const { return health; }
 
 	private:
 	int playerNumber;
@@ -44,6 +47,7 @@ class Player {
 	int height;
 
 	int health;
+	int score;
 
 	int angle = 0;
 	int angleX = 1;
@@ -55,6 +59,7 @@ class Player {
 
 	TextureWrapper playerTexture;
 	TextureWrapper eyeTexture;
+	TextureWrapper crossHair;
 };
 
 #endif

@@ -39,20 +39,30 @@ Player::Player(int num) {
 		cout << "Failed to load the player sprite!" << endl;
 	}
 	if(!eyeTexture.loadFromFile("sprites/player_squid_eye.png")) {
-		cout << "Failed to load the player sprite!" << endl;
+		cout << "Failed to load the eye sprite!" << endl;
+	}
+	if(!crossHair.loadFromFile("sprites/crosshair.png")) {
+		cout << "Failed to load the crosshair sprite!" << endl;
 	}
 
 	if(playerNumber == 1) {
 		playerTexture.setColor(64, 200, 64);
+		crossHair.setColor(64, 200, 64);
 	} else if(playerNumber == 2) {
 		playerTexture.setColor(200, 64, 64);
+		crossHair.setColor(200, 64, 64);
 	} else if(playerNumber == 3) {
 		playerTexture.setColor(64, 64, 200);
+		crossHair.setColor(64, 64, 200);
 	} else if(playerNumber == 4) {
 		playerTexture.setColor(200, 64, 200);
+		crossHair.setColor(200, 64, 200);
 	}
 
+	crossHair.setAlpha(128);
+
 	health = 100;
+	score = 0;
 }
 
 Player::Player() {
@@ -77,13 +87,13 @@ void Player::inputLeftStick(const SDL_Event& e) {
 }
 
 void Player::inputRightStickX(const SDL_Event& e) {
-	if(e.caxis.value > 10000 || e.caxis.value < -10000) {
+	if(e.caxis.value > 2500 || e.caxis.value < -2500) {
 		angleX = e.caxis.value;
 	}
 }
 
 void Player::inputRightStickY(const SDL_Event& e) {
-	if(e.caxis.value > 10000 || e.caxis.value < -10000) {
+	if(e.caxis.value > 2500 || e.caxis.value < -2500) {
 		angleY = e.caxis.value;
 	}
 }
@@ -149,7 +159,7 @@ void Player::update(int deltaTime) {
 	if(velY >= 0) gravity = PLAYER_HIGHGRAV;
 }
 
-void Player::render(int camX, int camY, int vX, int vY) {
+void Player::render(int camX, int camY, int vX, int vY, bool cross) {
 	SDL_RendererFlip flip;
 	if((angle >= -90 && angle <= 0) || (angle <= 90 && angle >= 0) ) {
 		flip = SDL_FLIP_HORIZONTAL;
@@ -162,7 +172,13 @@ void Player::render(int camX, int camY, int vX, int vY) {
 	SDL_Point eyeCenter;
 	eyeCenter.x = 4;
 	eyeCenter.y = 4;
-	eyeTexture.render(posX - camX + eyeX + vX, posY - camY  + 10 + vY, NULL, (double)angle, &eyeCenter, SDL_FLIP_HORIZONTAL);
+	eyeTexture.render(posX - camX + eyeX + vX, posY - camY  + 10 + vY, NULL, angle, &eyeCenter, SDL_FLIP_HORIZONTAL);
+	if(cross) {
+		SDL_Point playerCenter;
+		playerCenter.x = -100;
+		playerCenter.y = 0;
+		crossHair.render(posX - camX + vX + 100, posY - camY + vY + height / 2, NULL, angle, &playerCenter);
+	}
 }
 
 void Player::halveCameraHeight() {

@@ -3,20 +3,19 @@
  * Description: Entry point and main loop for the game
 */
 
-#include <vector>
-
 #include "common.h"
 #include "constants.h"
 #include "deltaclock.h"
-#include "player.h"
 #include "texture.h"
-#include "terrain.h"
+#include "text.h"
+#include "game.h"
 
 using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
+using std::stringstream;
 
 // Globals
 SDL_Window* gameWindow = NULL;
@@ -66,122 +65,97 @@ void closeSdlWindow() {
 }
 
 int main(int argc, char* argv[]) {
-	int numPlayers = 0;
-	#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-	freopen("debug.txt", "w", stdout);
-	printf("Testing!\n");
-	#endif
-	while(numPlayers < 2 || numPlayers > 4) {
-		cout << "How many players do you have? (2-4)" << endl;
-		cin >> numPlayers;
-	}
-
+	srand(time(NULL));
 	if(!initSdlWindow()) return (1);
-	if(SDL_NumJoysticks() < numPlayers) {
+	if(SDL_NumJoysticks() < 2) {
 		cout << "You don't have enough controllers connected." << endl;
-		cout << "EXPECTED: " << numPlayers << " GOT: " << SDL_NumJoysticks() << endl;
 		cout << "TODO: We need to add support for hotplugging controllers." << endl;
+		closeSdlWindow();
 		return (1);
 	}
 
-	srand(time(NULL));
-	Player* players[4];
-	for(int i = 0; i < numPlayers; i++) {
-		players[i] = new Player(i + 1);
-		if(numPlayers > 2) players[i]->halveCameraHeight();
-	}
-
-	//Generate terrain vector
-	Terrain T(LEVEL_WIDTH,LEVEL_HEIGHT);
-	T.generateTerrain(players,numPlayers);
-	//T.printLevel();
-
-	vector<SDL_Rect> viewports;
-	if(numPlayers == 2) {
-		viewports.push_back({0, 0, RENDER_WIDTH / 2, RENDER_HEIGHT});
-		viewports.push_back({RENDER_WIDTH / 2, 0, RENDER_WIDTH / 2, RENDER_HEIGHT});
-	} else {
-		viewports.push_back({0, 0, RENDER_WIDTH / 2, RENDER_HEIGHT / 2});
-		viewports.push_back({RENDER_WIDTH / 2, 0, RENDER_WIDTH / 2, RENDER_HEIGHT / 2});
-		viewports.push_back({0, RENDER_HEIGHT / 2, RENDER_WIDTH / 2, RENDER_HEIGHT / 2});
-		viewports.push_back({RENDER_WIDTH / 2, RENDER_HEIGHT / 2, RENDER_WIDTH / 2, RENDER_HEIGHT / 2});
-	}
-
 	bool quit = false;
+	bool startGame = false;
+	int numPlayers = 2;
+	stringstream menuText;
+	Text textRenderer("sprites/bigfont.png", 34, 32);
+
 	SDL_Event e;
-	SDL_Rect currentCamera;
-
-	TextureWrapper dirtTexture;
-	dirtTexture.loadFromFile("sprites/dirt.png");
-	dirtTexture.setColor(96, 96, 96);
-
+	SDL_GameController* menuPlayer;
+	menuPlayer = SDL_GameControllerOpen(0);
 	while(!quit) {
-		frameTimer.newFrame();
-
-		// Input loop
 		while(SDL_PollEvent(&e) != 0) {
 			if(e.type == SDL_QUIT) {
 				quit = true;
-			} else if(e.type == SDL_CONTROLLERAXISMOTION) {
-				if(e.caxis.axis ==SDL_CONTROLLER_AXIS_LEFTX) {
-					players[e.caxis.which]->inputLeftStick(e);
-				}
-				if(e.caxis.axis ==SDL_CONTROLLER_AXIS_RIGHTX) {
-					players[e.caxis.which]->inputRightStickX(e);
-				}
-				if(e.caxis.axis ==SDL_CONTROLLER_AXIS_RIGHTY) {
-					players[e.caxis.which]->inputRightStickY(e);
-				}
 			} else if(e.type == SDL_CONTROLLERBUTTONDOWN) {
-				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
-					players[e.cbutton.which]->inputRBDown(e);
-				}
-			} else if(e.type == SDL_CONTROLLERBUTTONUP) {
-				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
-					players[e.cbutton.which]->inputRBUp(e);
+				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) {
+					if(numPlayers < SDL_NumJoysticks()) {
+						numPlayers++;
+					}
+				} else if(e.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT) {
+					if(numPlayers > 2) {
+						numPlayers--;
+					}
+				} else if(e.cbutton.button == SDL_CONTROLLER_BUTTON_A) {
+					startGame = true;
+				} else if(e.cbutton.button == SDL_CONTROLLER_BUTTON_BACK) {
+					quit = true;
 				}
 			}
 		}
-
-		// Update entities
-
-		// Player update loop
-		for(int i = 0; i < numPlayers; i++) {
-			players[i]->update(frameTimer.getDelta());
-		}	
-
-		// Rendering
-		SDL_SetRenderDrawColor(gameRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		
+		SDL_SetRenderDrawColor(gameRenderer, 0x88, 0x88, 0x88, 0xFF);
 		SDL_RenderClear(gameRenderer);
+		
+		menuText.str("");
+		menuText << "FaB (SUPER DUPER EARLY PROTO)";
+		textRenderer.render(RENDER_WIDTH / 2 - (menuText.str().length() * textRenderer.getFontW() / 2),
+								textRenderer.getFontH(), menuText.str());
+		menuText.str("");
+		menuText << "Use the DPAD to select the number of players,";
+		textRenderer.render(RENDER_WIDTH / 2 - (menuText.str().length() * textRenderer.getFontW() / 2),
+								textRenderer.getFontH() * 3, menuText.str());
+		menuText.str("");
+		menuText << "A to start the game, or BACK/SELECT to exit.";
+		textRenderer.render(RENDER_WIDTH / 2 - (menuText.str().length() * textRenderer.getFontW() / 2),
+								textRenderer.getFontH() * 4, menuText.str());
+		menuText.str("");
+		menuText << "2";
+		if(numPlayers == 2) {
+			textRenderer.render(RENDER_WIDTH / 6, textRenderer.getFontH() * 16, menuText.str());
+		} else {
+			textRenderer.render(RENDER_WIDTH / 6, textRenderer.getFontH() * 16, menuText.str(), 96, 96, 96);
 
-		// Split-screen rendering loop
-		for(int i = 0; i < numPlayers; i++) {
-			SDL_RenderSetClipRect(gameRenderer, &viewports[i]);
-			currentCamera = players[i]->getCamera();
-			for(int y = 0; y < LEVEL_HEIGHT + dirtTexture.getWidth(); y += dirtTexture.getHeight()) {
-				for(int x = 0; x < LEVEL_WIDTH + dirtTexture.getWidth(); x += dirtTexture.getWidth()) {
-					if(x >= currentCamera.x - dirtTexture.getWidth()) {
-						if(y >= currentCamera.y - dirtTexture.getHeight()) {
-							dirtTexture.render(x - currentCamera.x + viewports[i].x, y - currentCamera.y + viewports[i].y);
-						}
-					}
-				}
-			}
-
-			for(int e = 0; e < numPlayers; e++) {
-				if(players[e]->getX() - currentCamera.x < currentCamera.w && players[e]->getX() - currentCamera.x > -(players[e]->getW())) {
-					if(players[e]->getY() - currentCamera.y < currentCamera.h && players[e]->getY() - currentCamera.y > -(players[e]->getH())) {
-						players[e]->render(currentCamera.x, currentCamera.y, viewports[i].x, viewports[i].y);
-					}
-				}
-			}
 		}
+		menuText.str("");
+		menuText << "3";
+		if(numPlayers == 3) {
+			textRenderer.render(RENDER_WIDTH / 2 - textRenderer.getFontW() / 2, textRenderer.getFontH() * 16, menuText.str());
+		} else if(SDL_NumJoysticks() < 3) {
+			textRenderer.render(RENDER_WIDTH / 2 - textRenderer.getFontW() / 2, textRenderer.getFontH() * 16, menuText.str(), 255, 0, 0);
+		} else {
+			textRenderer.render(RENDER_WIDTH / 2 - textRenderer.getFontW() / 2, textRenderer.getFontH() * 16, menuText.str(), 96, 96, 96);
+		}
+		menuText.str("");
+		menuText << "4";
+		if(numPlayers == 4) {
+			textRenderer.render(5 * RENDER_WIDTH / 6, textRenderer.getFontH() * 16, menuText.str());
+		} else if(SDL_NumJoysticks() < 4) {
+			textRenderer.render(5 * RENDER_WIDTH / 6, textRenderer.getFontH() * 16, menuText.str(), 255, 0, 0);
+		} else {
+			textRenderer.render(5 * RENDER_WIDTH / 6, textRenderer.getFontH() * 16, menuText.str(), 96, 96, 96);
+		}
+
 		SDL_RenderPresent(gameRenderer);
+		
+		if(startGame) {
+			SDL_GameControllerClose(menuPlayer);
+			menuPlayer = NULL;
+			gameLoop(numPlayers);
+			quit = true;
+		}
 	}
 
-	for(int i = 0; i < numPlayers; i++) {
-		delete players[i];
-	}
 	closeSdlWindow();
 	#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 	fclose(stdout);
