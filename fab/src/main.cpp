@@ -10,6 +10,7 @@
 #include "deltaclock.h"
 #include "player.h"
 #include "texture.h"
+#include "terrain.h"
 
 using std::cin;
 using std::cout;
@@ -89,6 +90,10 @@ int main(int argc, char* argv[]) {
 		players[i] = new Player(i + 1);
 		if(numPlayers > 2) players[i]->halveCameraHeight();
 	}
+
+	//Generate terrain vector
+	vector<int> level;
+	level.resize(LEVEL_WIDTH*LEVEL_HEIGHT,1);
 
 	vector<SDL_Rect> viewports;
 	if(numPlayers == 2) {

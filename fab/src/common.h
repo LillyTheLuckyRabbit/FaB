@@ -21,6 +21,10 @@
 #include <time.h>
 #include <stdio.h>
 #include <algorithm>	//min/max functions
+#include <math.h>		//trunc
+#include <vector>		//Used by disjoint sets/terrain
+#include <cstdlib>
+#include <cstdio>
 
 using std::cin;
 using std::cout;
