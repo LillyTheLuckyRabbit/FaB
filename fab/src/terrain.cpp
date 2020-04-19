@@ -8,22 +8,19 @@
 #include "terrain.h"
 using namespace std;
 
-DisjointSetByRankWPC::DisjointSetByRankWPC(int nelements)
-{
+DisjointSetBySize::DisjointSetBySize(int nelements){
   links.resize(nelements, -1);
-  ranks.resize(nelements, 1);
+  sizes.resize(nelements, 1);
 }
 
-int DisjointSetByRankWPC::Union(int s1, int s2)
-{
+int DisjointSetBySize::Union(int s1, int s2){
   int p, c;
-
   if (links[s1] != -1 || links[s2] != -1) {
     cerr << "Must call union on a set, and not just an element.\n";
     exit(1);
   }
 
-  if (ranks[s1] > ranks[s2]) {
+  if (sizes[s1] > sizes[s2]) {
     p = s1;
     c = s2;
   } else {
@@ -32,53 +29,113 @@ int DisjointSetByRankWPC::Union(int s1, int s2)
   }
   
   links[c] = p;
-  if (ranks[p] == ranks[c]) ranks[p]++;
+  sizes[p] += sizes[c];
   return p;
 }
 
-int DisjointSetByRankWPC::Find(int e)
+int DisjointSetBySize::Find(int element)
 {
-  int p, c;   // P is the parent, c is the child.
-
-  /* Find the root of the tree, but along the way, set
-     the parents' links to the children. */
-
-  c = -1;
-  while (links[e] != -1) {
-    p = links[e];
-    links[e] = c;
-    c = e;
-    e = p;
-  }
-
-  /* Now, travel back to the original element, setting
-     every link to the root of the tree. */
-
-  p = e;
-  e = c;
-  while (e != -1) {
-    c = links[e];
-    links[e] = p;
-    e =c;
-  }
-  return p;
+  while (links[element] != -1) element = links[element];
+  return element;
 }
 
-void DisjointSetByRankWPC::Print()
-{
-  int i;
+//void genTer(vector<int> &l, vector<int> &toVisit, int &playerUnion, const int &playerCount, DisjointSet *u, const vector<int> &playerPositions);
 
-  printf("\n");
-  printf("Node:  ");
-  for (i = 0; i < links.size(); i++) printf("%3d", i);  
-  printf("\n");
 
-  printf("Links: ");
-  for (i = 0; i < links.size(); i++) printf("%3d", links[i]);  
-  printf("\n");
-
-  printf("Ranks: ");
-  for (i = 0; i < links.size(); i++) printf("%3d", ranks[i]);  
-  printf("\n\n");
+/* generateTerrain acts as a helper function for genTer
+   Helper function initializes toVisit with player locations.
+*/
+void Terrain::generateTerrain(Player *p[4],int playerCount){
+	vector<int> toVisit;
+	vector<int> playerPositions;
+	//int playerCount = (sizeof(p))/(sizeof(p[0]));
+	for (int i = 0; i < playerCount; i++){ 
+		int addPos = (p[i]->getY()* LEVEL_WIDTH) + p[i]->getX();
+		if (i==0) toVisit.push_back(addPos);
+		playerPositions.push_back(addPos);
+		cout << "PLAYER " << i+1 << "/" << playerCount << " at " << p[i]->getX() << "," << p[i]->getY() << endl;
+	}
+	DisjointSet *u; //Player union
+	u = new DisjointSetBySize(LEVEL_WIDTH*LEVEL_HEIGHT);
+	//Initialize union with 1st player's position
+	int playerUnion = (p[0]->getY()*LEVEL_WIDTH)+p[0]->getX();
+	genTer(toVisit, playerUnion, playerCount, u, playerPositions);
+}
+/* genTer
+	Pseudocode:
+Base case - If find(player2-4) == find(player1), the function is done.
+Pick a random element from the list vector.
+For each of the element's neighbors...
+  Turn neighbors into air and call union on this element + neighbor
+  Add neighbor into the list vector (if they were dirt previously)
+*/
+void Terrain::genTer( vector<int> &toVisit, int playerUnion, int playerCount, DisjointSet *u, const vector<int> &playerPositions){
+	cout << "Before base cases\n";
+	//Emergency base case: The toVisit vector is empty; end and print error
+	if (toVisit.size() == 0){
+		cout << "ERROR: Terrain generation did not finish properly.\n";
+		return;
+	}
+	//Base case: all players are in the same union and the function is done.
+	if ((u->Find(playerUnion))==(u->Find(playerPositions[1]))){
+		if (playerCount > 2){
+			if ((u->Find(playerUnion))==(u->Find(playerPositions[2]))){
+				if (playerCount > 3){
+					if((u->Find(playerUnion))==(u->Find(playerPositions[3]))){
+						return;
+					}
+				}
+				else return;
+			}
+		}
+		else return;
+	}//End of totally-easy-to-read base case
+	//Choose a random element from toVisit
+	int visitNext = rand() % toVisit.size();
+	int visitPos = toVisit[visitNext];
+	int visitX = visitPos % LEVEL_WIDTH;
+	int visitY = visitPos / LEVEL_WIDTH;
+	cout << "At position: " << visitX << "," << visitY << endl;
+	//Check which neighbor cells aren't already air and modify them
+	//UP neighbor
+	if ((visitY <= (LEVEL_WIDTH))&&(l[(visitY+1)*LEVEL_WIDTH+(visitX)])){
+		l[(visitY+1)*LEVEL_WIDTH+(visitX)] = 0;
+		toVisit.push_back((visitY+1)*LEVEL_WIDTH+(visitX));
+		u->Union(u->Find(visitPos),u->Find((visitY+1)*LEVEL_WIDTH+(visitX)));
+	}
+	//DOWN neighbor
+	if ((visitY > 0)&&(l[(visitY-1)*LEVEL_WIDTH+(visitX)])){
+		l[(visitY-1)*LEVEL_WIDTH+(visitX)] = 0;
+		toVisit.push_back((visitY-1)*LEVEL_WIDTH+(visitX));
+		u->Union(u->Find(visitPos),u->Find((visitY-1)*LEVEL_WIDTH+(visitX)));
+	}
+	//RIGHT neighbor
+	if ((visitX <= (LEVEL_WIDTH))&&(l[(visitY)*LEVEL_WIDTH+(visitX+1)])){
+		l[(visitY)*LEVEL_WIDTH+(visitX+1)] = 0;
+		toVisit.push_back((visitY)*LEVEL_WIDTH+(visitX+1));
+		u->Union(u->Find(visitPos),u->Find((visitY)*LEVEL_WIDTH+(visitX+1)));
+	}
+	//LEFT neighbor
+	if ((visitX > 0)&&(l[(visitY)*LEVEL_WIDTH+(visitX-1)])){
+		l[(visitY)*LEVEL_WIDTH+(visitX-1)] = 0;
+		toVisit.push_back((visitY)*LEVEL_WIDTH+(visitX-1));
+		u->Union(u->Find(visitPos),u->Find((visitY)*LEVEL_WIDTH+(visitX-1)));
+	}
+	//Remove visitNext from toVisit
+	cout << "Before erase\n";
+	toVisit.erase(toVisit.begin()+visitNext);
+	cout << "Before recursive call\n";
+	//Recursive call
+	genTer(toVisit, playerUnion, playerCount, u, playerPositions);
 }
 
+//Debug command to see if terrain generation worked
+void Terrain::printLevel(){
+	for (int i =0; i < levWidth; i++){
+		for (int j = 0; j < levHeight; j++){
+			if ((j%80)==0) cout << l[i*levWidth+j];
+		}
+		if ((i%80)==0) cout << endl;
+	}
+	
+}

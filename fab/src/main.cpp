@@ -92,8 +92,9 @@ int main(int argc, char* argv[]) {
 	}
 
 	//Generate terrain vector
-	vector<int> level;
-	level.resize(LEVEL_WIDTH*LEVEL_HEIGHT,1);
+	Terrain T(LEVEL_WIDTH,LEVEL_HEIGHT);
+	T.generateTerrain(players,numPlayers);
+	//T.printLevel();
 
 	vector<SDL_Rect> viewports;
 	if(numPlayers == 2) {

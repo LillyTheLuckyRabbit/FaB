@@ -1,2 +1,10 @@
 Testing!
 How many players do you have? (2-4)
+PLAYER 1/2 at 148,1719
+PLAYER 2/2 at 232,1380
+Before base cases
+At position: 148,1719
+Before erase
+Before recursive call
+Before base cases
+At position: 147,1719
