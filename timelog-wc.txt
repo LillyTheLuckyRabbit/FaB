@@ -37,3 +37,4 @@
 
 2020-04-18
 14:30 - 17:00 - Fixed rendering and camera system
+18:30 - 22:00 - Implement player physics, aiming, added David's new sprites, updated camera

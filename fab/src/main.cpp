@@ -105,54 +105,77 @@ int main(int argc, char* argv[]) {
 	SDL_Event e;
 	SDL_Rect currentCamera;
 
-	int backgroundX = 334;
-	int backgroundY = 219;
-	int backPosX = 100;
-	int backPosY = 10;
-	TextureWrapper backGroundTexture;
-	if(!backGroundTexture.loadFromFile("sprites/squidward_bg.png")) {
-		cout << "Background texture failed to load!\n";
-	}
+	TextureWrapper dirtTexture;
+	dirtTexture.loadFromFile("sprites/dirt.png");
+	dirtTexture.setColor(96, 96, 96);
 
 	while(!quit) {
 		frameTimer.newFrame();
+
+		// Input loop
 		while(SDL_PollEvent(&e) != 0) {
 			if(e.type == SDL_QUIT) {
 				quit = true;
 			} else if(e.type == SDL_CONTROLLERAXISMOTION) {
 				if(e.caxis.axis ==SDL_CONTROLLER_AXIS_LEFTX) {
-					players[e.caxis.which]->handleEvent(e);
+					players[e.caxis.which]->inputLeftStick(e);
+				}
+				if(e.caxis.axis ==SDL_CONTROLLER_AXIS_RIGHTX) {
+					players[e.caxis.which]->inputRightStickX(e);
+				}
+				if(e.caxis.axis ==SDL_CONTROLLER_AXIS_RIGHTY) {
+					players[e.caxis.which]->inputRightStickY(e);
 				}
 			} else if(e.type == SDL_CONTROLLERBUTTONDOWN) {
-				// STUB
+				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
+					players[e.cbutton.which]->inputRBDown(e);
+				}
 			} else if(e.type == SDL_CONTROLLERBUTTONUP) {
-				// STUB
+				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
+					players[e.cbutton.which]->inputRBUp(e);
+				}
 			}
 		}
 
+		// Update entities
+
+		// Player update loop
+		for(int i = 0; i < numPlayers; i++) {
+			players[i]->update(frameTimer.getDelta());
+		}	
+
+		// Rendering
 		SDL_SetRenderDrawColor(gameRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(gameRenderer);
 
+		// Split-screen rendering loop
 		for(int i = 0; i < numPlayers; i++) {
 			SDL_RenderSetClipRect(gameRenderer, &viewports[i]);
 			currentCamera = players[i]->getCamera();
+			for(int y = 0; y < LEVEL_HEIGHT + dirtTexture.getWidth(); y += dirtTexture.getHeight()) {
+				for(int x = 0; x < LEVEL_WIDTH + dirtTexture.getWidth(); x += dirtTexture.getWidth()) {
+					if(x >= currentCamera.x - dirtTexture.getWidth()) {
+						if(y >= currentCamera.y - dirtTexture.getHeight()) {
+							dirtTexture.render(x - currentCamera.x + viewports[i].x, y - currentCamera.y + viewports[i].y);
+						}
+					}
+				}
+			}
+
 			for(int e = 0; e < numPlayers; e++) {
-				if(players[e]->getX() - currentCamera.x < currentCamera.w && players[e]->getX() - currentCamera.x > 0) {
-					if(players[e]->getY() - currentCamera.y < currentCamera.h && players[e]->getY() - currentCamera.y > 0) {
+				if(players[e]->getX() - currentCamera.x < currentCamera.w && players[e]->getX() - currentCamera.x > -(players[e]->getW())) {
+					if(players[e]->getY() - currentCamera.y < currentCamera.h && players[e]->getY() - currentCamera.y > -(players[e]->getH())) {
 						players[e]->render(currentCamera.x, currentCamera.y, viewports[i].x, viewports[i].y);
 					}
 				}
 			}
-			backGroundTexture.render(backPosX - currentCamera.x, backPosY - currentCamera.y);
 		}
 		SDL_RenderPresent(gameRenderer);
-		backPosX += 1;
 	}
 
 	for(int i = 0; i < numPlayers; i++) {
 		delete players[i];
 	}
-	backGroundTexture.free();
 	closeSdlWindow();
 	#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 	fclose(stdout);

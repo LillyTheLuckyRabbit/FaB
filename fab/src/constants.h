@@ -16,6 +16,10 @@
 #define LEVEL_WIDTH 4800
 #define LEVEL_HEIGHT 1800
 
+//Player constants
+#define PLAYER_HIGHGRAV 1500
+#define PLAYER_LOWGRAV 700
+
 //Bullet constants
 //#define MAX_LIFETIME //No max lifetime since mine projectiles could stick around until there are too many bullets on screen
 #define MIN_LIFETIME 5

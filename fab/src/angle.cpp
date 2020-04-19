@@ -5,6 +5,7 @@
  * an angle based on x and y components.
 */
 
+#include "angle.h"
 #include "common.h"
 #include <math.h>
 
