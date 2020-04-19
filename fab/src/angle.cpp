@@ -12,19 +12,19 @@
 int getDegrees(int x, int y) {
 	double degFloat;
 	degFloat = atan2((double)y, (double)x) * (180 / M_PI);
-	return(floor(degFloat));
+	return(trunc(degFloat));
 }
 
 int getXComp(int deg, int mag) {
 	double xCompFloat, scalar;
 	scalar = cos((double)deg * (180 / M_PI));
 	xCompFloat = (double)mag * scalar;
-	return(floor(xCompFloat));
+	return(trunc(xCompFloat));
 }
 
 int getYComp(int deg, int mag) {
 	double yCompFloat, scalar;
 	scalar = sin((double)deg * (180 / M_PI));
 	yCompFloat = (double)mag * scalar;
-	return(floor(yCompFloat));
+	return(trunc(yCompFloat));
 }

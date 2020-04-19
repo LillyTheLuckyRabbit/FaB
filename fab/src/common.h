@@ -25,6 +25,8 @@
 #include <vector>		//Used by disjoint sets/terrain
 #include <cstdlib>
 #include <cstdio>
+#include <vector>
+#include <sstream>
 
 using std::cin;
 using std::cout;
