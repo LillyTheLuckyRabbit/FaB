@@ -5,6 +5,7 @@
 */
 
 #include "player.h"
+
 #include "angle.h"
 
 Player::Player(int num) {
@@ -63,6 +64,10 @@ Player::Player(int num) {
 
 	health = 100;
 	score = 0;
+
+	grounded = false;
+	dashAvail = true;
+	dig = true;
 }
 
 Player::Player() {
@@ -98,11 +103,48 @@ void Player::inputRightStickY(const SDL_Event& e) {
 	}
 }
 
+bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T) {
+	bool containsTerrain = false;
+	if(e.caxis.value > 2500) {
+		if(dig) {
+			int centerX = (width / 2 + getXComp(angle, 20)) + posX;
+			int centerY = (height / 2 + getYComp(angle, 20)) + posY;
+			int radius = 20;
+			for(int y = -radius; y <= radius; y++) {
+				for(int x = -radius; x <= radius; x++) {
+					if(x * x + y * y < radius * radius) {
+						if(T.getValueAtXY(centerX + x, centerY + y)) {
+							containsTerrain = true;
+							break;
+						}
+					}
+				}
+				if(containsTerrain) break;
+			}
+			if(containsTerrain) {
+				for(int y = -radius; y <= radius; y++) {
+					for(int x = -radius; x <= radius; x++) {
+						if(x * x + y * y < radius * radius) {
+							T.setValueAtXY(centerX + x, centerY + y, 0);
+						}
+					}
+				}
+				dig = false;
+			}
+		}
+	} else if(e.caxis.value == 0) {
+		dig = true;
+	}
+	return (containsTerrain);
+}
+
 void Player::inputRBDown(const SDL_Event& e) {
 	if(e.cbutton.state == SDL_PRESSED) {
-		if(posY + height == LEVEL_HEIGHT) {
+		if(grounded) {
 			velY = -500;
+			posY -= 1;
 			gravity = PLAYER_LOWGRAV;
+			grounded = false;
 		}
 	}
 }
@@ -113,7 +155,7 @@ void Player::inputRBUp(const SDL_Event& e) {
 	}
 }
 
-void Player::update(int deltaTime) {
+void Player::update(int deltaTime, const Terrain& T) {
 	if(posX - camera.x < camera.w / 6 && camera.x > 0) {
 		camera.x -= 2;
 		if(posX - width < camera.x) {
@@ -144,24 +186,73 @@ void Player::update(int deltaTime) {
 	if(velX) {
 		float deltaX = (velX * deltaTime) / 1000.0;
 		posX += trunc(deltaX);
-		if (posX + width > LEVEL_WIDTH) posX = LEVEL_WIDTH - width;
-		if (posX < 0) posX = 0;
+
+		/*
+		if(checkCollision(T)) {
+			int backTrack = abs(trunc(deltaX));
+			while(backTrack) {
+				if(velX < 0) {
+					posX++;
+					backTrack--;
+				} else {
+					posX--;
+					backTrack--;
+				}
+			}
+		}
+		*/
+
+		if(posX + width > LEVEL_WIDTH) posX = LEVEL_WIDTH - width;
+		if(posX < 0) posX = 0;
 	}
 
 	float deltaY = ((velY * deltaTime) + .5 * gravity * (deltaTime * deltaTime) / 1000.0) / 1000.0;
 	posY += trunc(deltaY);
-	if (posY + height > LEVEL_HEIGHT) {
+	if(velY >= 0) gravity = PLAYER_HIGHGRAV;
+	if(posY + height > LEVEL_HEIGHT) {
 		posY = LEVEL_HEIGHT - height;
 		velY = 0;
+		grounded = true;
+	} else {
+		velY = velY + (gravity * deltaTime / 1000.0);
 	}
-	if (posY < 0) posY = 1;
-	velY = velY + (gravity * deltaTime / 1000.0);
-	if(velY >= 0) gravity = PLAYER_HIGHGRAV;
+
+	/*
+	if(checkCollision(T)) {
+		int backTrack = abs(trunc(deltaY));
+		while(backTrack) {
+			if(velY > 0) {
+				posY--;
+				backTrack--;
+			} else {
+				posY++;
+				backTrack--;
+			}
+		}
+		grounded = true;
+	}
+	*/
+
+	if(posY < 0) posY = 1;
+}
+
+bool Player::checkCollision(const Terrain& T) {
+	if(posX <= 0 || posX >= LEVEL_WIDTH - width || posY <= 0 || posY >= LEVEL_HEIGHT - height) {
+		return (true);
+	}
+	for(int y = 0; y < height; y++) {
+		for(int x = 0; x < width; x++) {
+			if(T.getValueAtXY(posX + x, posY + y)) {
+				return (true);
+			}
+		}
+	}
+	return (false);
 }
 
 void Player::render(int camX, int camY, int vX, int vY, bool cross) {
 	SDL_RendererFlip flip;
-	if((angle >= -90 && angle <= 0) || (angle <= 90 && angle >= 0) ) {
+	if((angle >= -90 && angle <= 0) || (angle <= 90 && angle >= 0)) {
 		flip = SDL_FLIP_HORIZONTAL;
 	} else {
 		flip = SDL_FLIP_NONE;
@@ -172,7 +263,7 @@ void Player::render(int camX, int camY, int vX, int vY, bool cross) {
 	SDL_Point eyeCenter;
 	eyeCenter.x = 4;
 	eyeCenter.y = 4;
-	eyeTexture.render(posX - camX + eyeX + vX, posY - camY  + 10 + vY, NULL, angle, &eyeCenter, SDL_FLIP_HORIZONTAL);
+	eyeTexture.render(posX - camX + eyeX + vX, posY - camY + 10 + vY, NULL, angle, &eyeCenter, SDL_FLIP_HORIZONTAL);
 	if(cross) {
 		SDL_Point playerCenter;
 		playerCenter.x = -100;

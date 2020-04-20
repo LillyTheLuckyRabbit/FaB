@@ -15,14 +15,8 @@ void gameLoop(int numPlayers) {
 	}
 
 	cout << "Testing terrain generator!\n";
-	//Generate terrain vector
-	//vector<int> level;
-	//level.resize(LEVEL_WIDTH*LEVEL_HEIGHT,1);
-	//Generate terrain vector
 	Terrain T(LEVEL_WIDTH,LEVEL_HEIGHT);
 	T.generateTerrain(players,numPlayers);
-	T.printLevel();
-
 
 	vector<SDL_Rect> viewports;
 	if(numPlayers == 2) {
@@ -68,6 +62,9 @@ void gameLoop(int numPlayers) {
 				if(e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTY) {
 					players[e.caxis.which]->inputRightStickY(e);
 				}
+				if(e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT) {
+					updateTerrain = players[e.caxis.which]->inputLeftTrigger(e, T);
+				}
 			} else if(e.type == SDL_CONTROLLERBUTTONDOWN) {
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
 					players[e.cbutton.which]->inputRBDown(e);
@@ -83,7 +80,7 @@ void gameLoop(int numPlayers) {
 
 		// Player update loop
 		for(int i = 0; i < numPlayers; i++) {
-			players[i]->update(frameTimer.getDelta());
+			players[i]->update(frameTimer.getDelta(), T);
 		}
 
 		// Rendering
@@ -101,7 +98,7 @@ void gameLoop(int numPlayers) {
 				Uint32 noTerrain = SDL_MapRGBA(mappingFormat, 0x00, 0x00, 0x00, 0x40);
 				Uint32 transparent = SDL_MapRGBA(mappingFormat, 0xFF, 0xFF, 0xFF, 0x00);
 				for(int i = 0; i < pixelCount; i++) {
-					if(level[i]) {
+					if(T.getValueAtIndex(i)) {
 						pixels[i] = transparent;
 					} else {
 						pixels[i] = noTerrain;

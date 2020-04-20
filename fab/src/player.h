@@ -4,6 +4,9 @@
 #include "common.h"
 #include "constants.h"
 #include "texture.h"
+#include "terrain.h"
+
+class Terrain;
 
 class Player {
 	public:
@@ -19,8 +22,10 @@ class Player {
 	void inputRBUp(const SDL_Event& e);
 	void inputRightStickX(const SDL_Event& e);
 	void inputRightStickY(const SDL_Event& e);
+	bool inputLeftTrigger(const SDL_Event& e, Terrain& T);
 
-	void update(int deltaTime);
+	void update(int deltaTime, const Terrain &T);
+	bool checkCollision(const Terrain &T);
 
 	void render(int camX, int camY, int vX, int vY, bool cross);
 
@@ -52,6 +57,12 @@ class Player {
 	int angle = 0;
 	int angleX = 1;
 	int angleY = 0;
+
+	bool grounded;
+	
+	bool dashAvail;
+
+	bool dig;
 
 	SDL_GameController* controllerPtr;
 

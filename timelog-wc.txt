@@ -41,3 +41,4 @@
 
 2020-04-19
 12:30 - 16:00 - In-game menu, text rendering, crosshairs, fixed angle calculation
+19:00 - 02:00 - Oof

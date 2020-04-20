@@ -9,3 +9,7 @@
 *.exe
 *.elf
 /prep_coar/ball
+/fab/debug.txt
+/fab/input.txt
+/fab/LICENSE.*
+/fab/output.txt

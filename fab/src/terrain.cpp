@@ -54,6 +54,11 @@ void Terrain::generateTerrain(Player *p[4],int playerCount){
 		if (i==0) toVisit.push_back(addPos);
 		playerPositions.push_back(addPos);
 		cout << "PLAYER " << i+1 << "/" << playerCount << " at " << p[i]->getX() << "," << p[i]->getY() << endl;
+		for(int y = -1; y < p[i]->getH() + 1; y++) {
+			for(int x = -1; x < p[i]->getW() + 1; x++) {
+				l[(p[i]->getY()*LEVEL_WIDTH+1)+p[i]->getX()+x] = 0;
+			}
+		}
 	}
 	DisjointSet *u; //Player union
 	u = new DisjointSetBySize(LEVEL_WIDTH*LEVEL_HEIGHT);
@@ -115,7 +120,7 @@ while (!terrainDone){
 	//UP neighbor
 	//cout << "\tBEFORE UP, checking at L: " << (visitY+1)*LEVEL_WIDTH+(visitX) << " or " << "(" << visitX << "," << visitY+1 << ")" << endl;
 	//cout << "\tAlso, L has " << l[(visitY+1)*LEVEL_WIDTH+(visitX)] << endl;
-	if ((visitY <= (LEVEL_WIDTH))&&((u->Find(playerUnion)!=(u->Find((visitY+1)*LEVEL_WIDTH+(visitX)))))){
+	if ((visitY < (LEVEL_HEIGHT))&&((u->Find(playerUnion)!=(u->Find((visitY+1)*LEVEL_WIDTH+(visitX)))))){
 		//cout << "\tUP\n";
 		l[(visitY+1)*LEVEL_WIDTH+(visitX)] = 0;
 		toVisit.push_back((visitY+1)*LEVEL_WIDTH+(visitX));
@@ -139,7 +144,7 @@ while (!terrainDone){
 	}
 	//cout << "3\n";
 	//RIGHT neighbor
-	if ((visitX <= (LEVEL_HEIGHT))&&((u->Find(playerUnion)!=(u->Find((visitY)*LEVEL_WIDTH+(visitX+1)))))){
+	if ((visitX < (LEVEL_WIDTH))&&((u->Find(playerUnion)!=(u->Find((visitY)*LEVEL_WIDTH+(visitX+1)))))){
 		//cout << "\tRIGHT\n";
 		l[(visitY)*LEVEL_WIDTH+(visitX+1)] = 0;
 		toVisit.push_back((visitY)*LEVEL_WIDTH+(visitX+1));
@@ -167,4 +172,32 @@ void Terrain::printLevel(){
 			cout << endl;
 	}
 	
+}
+
+int Terrain::getValueAtIndex(int index) const{
+	if(index < l.size()) {
+		return l[index];
+	} else {
+		return(0);
+	}
+}
+
+int Terrain::getValueAtXY(int x, int y) const {
+	if(y * levWidth + x < l.size()) {
+		return l[y * levWidth + x];
+	} else {
+		return(0);
+	}
+}
+
+void Terrain::setValueAtIndex(int index, int value) {
+	if(index < l.size()) {
+		l[index] = value;
+	}
+}
+
+void Terrain::setValueAtXY(int x, int y, int value) {
+	if(y * levWidth + x < l.size()) {
+		l[y * levWidth + x] = value;
+	}
 }

@@ -19,8 +19,6 @@
 #endif
 #define LEVEL_WIDTH 4800
 #define LEVEL_HEIGHT 1800
-//#define LEVEL_WIDTH 48
-//#define LEVEL_HEIGHT 18
 
 //Player constants
 #define PLAYER_HIGHGRAV 1500

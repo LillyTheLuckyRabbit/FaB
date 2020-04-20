@@ -19,7 +19,7 @@ int getXComp(int deg, int mag) {
 	double xCompFloat, scalar;
 	scalar = cos((double)deg * (180 / M_PI));
 	xCompFloat = (double)mag * scalar;
-	return(trunc(xCompFloat));
+	return(-trunc(xCompFloat));
 }
 
 int getYComp(int deg, int mag) {
