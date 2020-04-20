@@ -70,15 +70,11 @@ For each of the element's neighbors...
   Add neighbor into the list vector (if they were dirt previously)
 */
 void Terrain::genTer( vector<int> &toVisit, int playerUnion, int playerCount, DisjointSet *u, const vector<int> &playerPositions){
-bool terrainDone = false;
-while (!terrainDone){
-	//cout << "Before base cases\n";
+	cout << "Before base cases\n";
 	//Emergency base case: The toVisit vector is empty; end and print error
 	if (toVisit.size() == 0){
 		cout << "ERROR: Terrain generation did not finish properly.\n";
-		terrainDone = true;
-		break;
-		//return;
+		return;
 	}
 	//Base case: all players are in the same union and the function is done.
 	if ((u->Find(playerUnion))==(u->Find(playerPositions[1]))){
@@ -86,85 +82,72 @@ while (!terrainDone){
 			if ((u->Find(playerUnion))==(u->Find(playerPositions[2]))){
 				if (playerCount > 3){
 					if((u->Find(playerUnion))==(u->Find(playerPositions[3]))){
-						terrainDone = true;
-						break;
-						//return;
+						return;
 					}
 				}
-				else {
-					terrainDone = true;
-					break;
-					//return;
-				}
+				else return;
 			}
 		}
 		else return;
 	}//End of totally-easy-to-read base case
 	//DEBUG: print toVisit
-	/*for (auto i = toVisit.begin(); i != toVisit.end(); i++) {
+	for (auto i = toVisit.begin(); i != toVisit.end(); i++) {
 		cout << "(" << *i%LEVEL_WIDTH << "," << *i/LEVEL_WIDTH << ") ";
-	}*/
-	//cout << endl;
+	}
+	cout << endl;
 	//Choose a random element from toVisit
 	int visitNext = rand() % toVisit.size();
 	int visitPos = toVisit[visitNext];
 	int visitX = visitPos % LEVEL_WIDTH;
 	int visitY = visitPos / LEVEL_WIDTH;
-	//cout << "At position: " << visitX << "," << visitY << endl;
+	cout << "At position: " << visitX << "," << visitY << endl;
 	//Check which neighbor cells aren't already air and modify them
 	//UP neighbor
-	//cout << "\tBEFORE UP, checking at L: " << (visitY+1)*LEVEL_WIDTH+(visitX) << " or " << "(" << visitX << "," << visitY+1 << ")" << endl;
-	//cout << "\tAlso, L has " << l[(visitY+1)*LEVEL_WIDTH+(visitX)] << endl;
-	if ((visitY <= (LEVEL_WIDTH))&&((u->Find(playerUnion)!=(u->Find((visitY+1)*LEVEL_WIDTH+(visitX)))))){
-		//cout << "\tUP\n";
+	cout << "\tBEFORE UP, checking at L: " << (visitY+1)*LEVEL_WIDTH+(visitX) << " or " << "(" << visitX << "," << visitY+1 << ")" << endl;
+	cout << "\tAlso, L has " << l[(visitY+1)*LEVEL_WIDTH+(visitX)] << endl;
+	if ((visitY <= (LEVEL_WIDTH))&&(l[(visitY+1)*LEVEL_WIDTH+(visitX)])){
+		cout << "\tUP\n";
 		l[(visitY+1)*LEVEL_WIDTH+(visitX)] = 0;
 		toVisit.push_back((visitY+1)*LEVEL_WIDTH+(visitX));
 		u->Union(u->Find(visitPos),u->Find((visitY+1)*LEVEL_WIDTH+(visitX)));
 	}
-	//cout << "1\n";
 	//DOWN neighbor
-	if ((visitY > 0)&&((u->Find(playerUnion)!=(u->Find((visitY-1)*LEVEL_WIDTH+(visitX)))))){
-		//cout << "\tDOWN\n";
+	if ((visitY > 0)&&(l[(visitY-1)*LEVEL_WIDTH+(visitX)])){
+		cout << "\tDOWN\n";
 		l[(visitY-1)*LEVEL_WIDTH+(visitX)] = 0;
 		toVisit.push_back((visitY-1)*LEVEL_WIDTH+(visitX));
 		u->Union(u->Find(visitPos),u->Find((visitY-1)*LEVEL_WIDTH+(visitX)));
 	}
-	//cout << "2\n";
 	//LEFT neighbor
-	if ((visitX > 0)&&((u->Find(playerUnion)!=(u->Find((visitY)*LEVEL_WIDTH+(visitX-1)))))){
-		//cout << "\tLEFT\n";
+	if ((visitX > 0)&&(l[(visitY)*LEVEL_WIDTH+(visitX-1)])){
+		cout << "\tLEFT\n";
 		l[(visitY)*LEVEL_WIDTH+(visitX-1)] = 0;
 		toVisit.push_back((visitY)*LEVEL_WIDTH+(visitX-1));
 		u->Union(u->Find(visitPos),u->Find((visitY)*LEVEL_WIDTH+(visitX-1)));
 	}
-	//cout << "3\n";
 	//RIGHT neighbor
-	if ((visitX <= (LEVEL_HEIGHT))&&((u->Find(playerUnion)!=(u->Find((visitY)*LEVEL_WIDTH+(visitX+1)))))){
-		//cout << "\tRIGHT\n";
+	if ((visitX <= (LEVEL_HEIGHT))&&(l[(visitY)*LEVEL_WIDTH+(visitX+1)])){
+		cout << "\tRIGHT\n";
 		l[(visitY)*LEVEL_WIDTH+(visitX+1)] = 0;
 		toVisit.push_back((visitY)*LEVEL_WIDTH+(visitX+1));
 		u->Union(u->Find(visitPos),u->Find((visitY)*LEVEL_WIDTH+(visitX+1)));
 	}
 
 	//Remove visitNext from toVisit
-	//cout << "Before erase\n";
+	cout << "Before erase\n";
 	toVisit.erase(toVisit.begin()+visitNext);
-	//cout << "Before recursive call\n";
-	}//end of while	
+	cout << "Before recursive call\n";
 	//Recursive call
-	//genTer(toVisit, playerUnion, playerCount, u, playerPositions);
-	return;
+	genTer(toVisit, playerUnion, playerCount, u, playerPositions);
 }
 
 //Debug command to see if terrain generation worked
 void Terrain::printLevel(){
-	for (int i = 0; i < levHeight; i++){
-		for (int j = 0; j < levWidth; j++){
-			//if ((j%80)==0) 
-				cout << l[i*levWidth+j] << " ";
+	for (int i =0; i < levWidth; i++){
+		for (int j = 0; j < levHeight; j++){
+			if ((j%80)==0) cout << l[i*levWidth+j];
 		}
-		//if ((i%80)==0) 
-			cout << endl;
+		if ((i%80)==0) cout << endl;
 	}
 	
 }

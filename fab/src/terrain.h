@@ -61,10 +61,10 @@ class Terrain{
 		void generateTerrain(Player *p[4],int playerCount);
 		void printLevel();
 	private:
-	vector<int> l; //level
-	int levWidth;
-	int levHeight;
-	//level.resize(LEVEL_WIDTH*LEVEL_HEIGHT,1);
+		vector<int> l; //level
+		int levWidth;
+		int levHeight;
+		//level.resize(LEVEL_WIDTH*LEVEL_HEIGHT,1);
 };
 
 

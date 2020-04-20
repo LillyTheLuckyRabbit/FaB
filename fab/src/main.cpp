@@ -29,7 +29,7 @@ bool initSdlWindow() {
 		success = false;
 	} else {
 		gameWindow = SDL_CreateWindow("FaB", SDL_WINDOWPOS_UNDEFINED,
-		                              SDL_WINDOWPOS_UNDEFINED, RENDER_WIDTH, RENDER_HEIGHT, SDL_WINDOW_SHOWN);
+		                              SDL_WINDOWPOS_UNDEFINED, RENDER_WIDTH, RENDER_HEIGHT, SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
 		if(gameWindow == NULL) {
 			cout << "Window could not be created! SDL_Error: " << SDL_GetError() << endl;
 		} else {
@@ -65,6 +65,11 @@ void closeSdlWindow() {
 }
 
 int main(int argc, char* argv[]) {
+	//Reroute output to debug.txt for... uh... debugging.
+	#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	freopen("debug.txt", "w", stdout);
+	#endif
+	
 	srand(time(NULL));
 	if(!initSdlWindow()) return (1);
 	if(SDL_NumJoysticks() < 2) {

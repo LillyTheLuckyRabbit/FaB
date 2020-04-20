@@ -13,8 +13,14 @@
 //Level constants
 #define RENDER_WIDTH 1600
 #define RENDER_HEIGHT 900
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#define RENDER_WIDTH 1200
+#define RENDER_HEIGHT 675
+#endif
 #define LEVEL_WIDTH 4800
 #define LEVEL_HEIGHT 1800
+//#define LEVEL_WIDTH 48
+//#define LEVEL_HEIGHT 18
 
 //Player constants
 #define PLAYER_HIGHGRAV 1500
