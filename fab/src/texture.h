@@ -24,11 +24,27 @@ class TextureWrapper {
 	int getWidth();
 	int getHeight();
 
-	private:
+	protected:
 	SDL_Texture* texturePtr;
 
 	int textureWidth;
 	int textureHeight;
+};
+
+class TextureWrapperStreaming : public TextureWrapper {
+	public:
+	TextureWrapperStreaming();
+	void free();
+	bool loadFromFile(string path);
+	bool createBlank(int w, int h);
+	bool lockTexture();
+	bool unlockTexture();
+	void* getPixels() { return pixelsPtr; }
+	int getPitch() { return pitch; }
+
+	private:
+	void* pixelsPtr;
+	int pitch;
 };
 
 #endif

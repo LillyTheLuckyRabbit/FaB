@@ -1,10 +1,13 @@
 #include "game.h"
 
 //Forward declaration of globals
+extern SDL_Window* gameWindow;
 extern SDL_Renderer* gameRenderer;
 extern DeltaClock frameTimer;
 
 void gameLoop(int numPlayers) {
+	Uint32 format = SDL_GetWindowPixelFormat(gameWindow);
+
 	Player* players[4];
 	for(int i = 0; i < numPlayers; i++) {
 		players[i] = new Player(i + 1);
@@ -13,7 +16,7 @@ void gameLoop(int numPlayers) {
 
 	//Generate terrain vector
 	vector<int> level;
-	level.resize(LEVEL_WIDTH*LEVEL_HEIGHT,1);
+	level.resize(LEVEL_WIDTH * LEVEL_HEIGHT, 0);
 
 	vector<SDL_Rect> viewports;
 	if(numPlayers == 2) {
@@ -32,11 +35,15 @@ void gameLoop(int numPlayers) {
 
 	TextureWrapper dirtTexture;
 	dirtTexture.loadFromFile("sprites/dirt.png");
-	dirtTexture.setColor(96, 96, 96);
 
 	int scoreToWin = 15;
 	Text textRenderer("sprites/font.png", 17, 16);
 	stringstream hudText;
+
+	TextureWrapperStreaming terrainTexture;
+	bool updateTerrain = true;
+	terrainTexture.createBlank(LEVEL_WIDTH, LEVEL_HEIGHT);
+	terrainTexture.setBlendMode(SDL_BLENDMODE_BLEND);
 
 	while(!quit) {
 		frameTimer.newFrame();
@@ -46,13 +53,13 @@ void gameLoop(int numPlayers) {
 			if(e.type == SDL_QUIT) {
 				quit = true;
 			} else if(e.type == SDL_CONTROLLERAXISMOTION) {
-				if(e.caxis.axis ==SDL_CONTROLLER_AXIS_LEFTX) {
+				if(e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX) {
 					players[e.caxis.which]->inputLeftStick(e);
 				}
-				if(e.caxis.axis ==SDL_CONTROLLER_AXIS_RIGHTX) {
+				if(e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX) {
 					players[e.caxis.which]->inputRightStickX(e);
 				}
-				if(e.caxis.axis ==SDL_CONTROLLER_AXIS_RIGHTY) {
+				if(e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTY) {
 					players[e.caxis.which]->inputRightStickY(e);
 				}
 			} else if(e.type == SDL_CONTROLLERBUTTONDOWN) {
@@ -71,11 +78,35 @@ void gameLoop(int numPlayers) {
 		// Player update loop
 		for(int i = 0; i < numPlayers; i++) {
 			players[i]->update(frameTimer.getDelta());
-		}	
+		}
 
 		// Rendering
 		SDL_SetRenderDrawColor(gameRenderer, 0x00, 0x00, 0x00, 0xFF);
 		SDL_RenderClear(gameRenderer);
+
+		// Terrain updating
+		if(updateTerrain) {
+			if(!terrainTexture.lockTexture()) {
+				cout << "Unable to lock terrain texture!" << endl;
+			} else {
+				SDL_PixelFormat* mappingFormat = SDL_AllocFormat(format);
+				Uint32* pixels = (Uint32*)terrainTexture.getPixels();
+				int pixelCount = (terrainTexture.getPitch() / 4) * terrainTexture.getHeight();
+				Uint32 noTerrain = SDL_MapRGBA(mappingFormat, 0x00, 0x00, 0x00, 0x40);
+				Uint32 transparent = SDL_MapRGBA(mappingFormat, 0xFF, 0xFF, 0xFF, 0x00);
+				for(int i = 0; i < pixelCount; i++) {
+					if(level[i]) {
+						pixels[i] = transparent;
+					} else {
+						pixels[i] = noTerrain;
+					}
+				}
+				terrainTexture.unlockTexture();
+				updateTerrain = false;
+				SDL_FreeFormat(mappingFormat);
+				terrainTexture.setBlendMode(SDL_BLENDMODE_BLEND);
+			}
+		}
 
 		// Split-screen rendering loop
 		for(int i = 0; i < numPlayers; i++) {
@@ -90,6 +121,7 @@ void gameLoop(int numPlayers) {
 					}
 				}
 			}
+			terrainTexture.render(0 + viewports[i].x, 0 + viewports[i].y, &currentCamera);
 
 			for(int e = 0; e < numPlayers; e++) {
 				if(players[e]->getX() - currentCamera.x < currentCamera.w && players[e]->getX() - currentCamera.x > -(players[e]->getW())) {
@@ -109,7 +141,6 @@ void gameLoop(int numPlayers) {
 			hudText.str("");
 			hudText << "Score: " << players[i]->getScore() << "/" << scoreToWin;
 			textRenderer.render(viewports[i].w - ((hudText.str().length() + 1) * textRenderer.getFontW()) + viewports[i].x, viewports[i].h - textRenderer.getFontH() - 4 + viewports[i].y, hudText.str());
-
 		}
 		SDL_RenderSetClipRect(gameRenderer, NULL);
 		SDL_RenderPresent(gameRenderer);
@@ -118,5 +149,4 @@ void gameLoop(int numPlayers) {
 	for(int i = 0; i < numPlayers; i++) {
 		delete players[i];
 	}
-
 }
