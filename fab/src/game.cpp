@@ -14,9 +14,15 @@ void gameLoop(int numPlayers) {
 		if(numPlayers > 2) players[i]->halveCameraHeight();
 	}
 
+	cout << "Testing terrain generator!\n";
 	//Generate terrain vector
-	vector<int> level;
-	level.resize(LEVEL_WIDTH * LEVEL_HEIGHT, 0);
+	//vector<int> level;
+	//level.resize(LEVEL_WIDTH*LEVEL_HEIGHT,1);
+	//Generate terrain vector
+	Terrain T(LEVEL_WIDTH,LEVEL_HEIGHT);
+	T.generateTerrain(players,numPlayers);
+	T.printLevel();
+
 
 	vector<SDL_Rect> viewports;
 	if(numPlayers == 2) {

@@ -22,7 +22,7 @@ class DisjointSet {
     virtual ~DisjointSet() {};
     virtual int Union(int s1, int s2) = 0;
     virtual int Find(int element) = 0;  
-    virtual void Print() = 0;
+    //virtual void Print() = 0;
 };
 
 /* The first subclass implements Union-by-Size. */
@@ -32,39 +32,41 @@ class DisjointSetBySize : public DisjointSet {
     DisjointSetBySize(int nelements);
     int Union(int s1, int s2);
     int Find(int element); 
-    void Print();
+    //void Print();
+	
+	//Terrain functions
+	/*void generateTerrain(const Player p[], vector<int> &l);
+	void genTer(vector<int> &l, vector<int> &toVisit, int &playerUnion, const int &playerCount, DisjointSet *u, const vector<int> &playerPositions);*/
 
   protected:
     vector <int> links;
     vector <int> sizes;
 };
 
-/* The second subclass implements Union-by-Height. */
 
-class DisjointSetByHeight : public DisjointSet {
-  public:
-    DisjointSetByHeight(int nelements);
-    int Union(int s1, int s2);
-    int Find(int element); 
-    void Print();
-
-  protected:
-    vector <int> links;
-    vector <int> heights;
+class Terrain{
+	public:
+		virtual ~Terrain() {
+			l.clear();
+		};
+		Terrain(int x, int y){
+			l.resize(x*y,1);
+			levWidth = x;
+			levHeight = y;
+		}
+		Terrain(){
+			
+		}
+		void genTer(vector<int> &toVisit, int playerUnion, int playerCount, DisjointSet *u, const vector<int> &playerPositions);
+		void generateTerrain(Player *p[4],int playerCount);
+		void printLevel();
+	private:
+		vector<int> l; //level
+		int levWidth;
+		int levHeight;
+		//level.resize(LEVEL_WIDTH*LEVEL_HEIGHT,1);
 };
 
-/* The third subclass implements Union-by-Rank with path compression. */
 
-class DisjointSetByRankWPC : public DisjointSet {
-  public:
-    DisjointSetByRankWPC(int nelements);
-    int Union(int s1, int s2);
-    int Find(int element); 
-    void Print();
-
-  protected:
-    vector <int> links;
-    vector <int> ranks;
-};
 
 #endif
