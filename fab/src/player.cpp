@@ -149,6 +149,12 @@ void Player::inputRBDown(const SDL_Event& e) {
 	}
 }
 
+void Player::inputY(const SDL_Event& e) {
+	if(e.cbutton.state == SDL_PRESSED) {
+		posY -= 30;
+	}
+}
+
 void Player::inputRBUp(const SDL_Event& e) {
 	if(e.cbutton.state == SDL_RELEASED) {
 		gravity = PLAYER_HIGHGRAV;
@@ -187,7 +193,7 @@ void Player::update(int deltaTime, const Terrain& T) {
 		float deltaX = (velX * deltaTime) / 1000.0;
 		posX += trunc(deltaX);
 
-		/*
+		
 		if(checkCollision(T)) {
 			int backTrack = abs(trunc(deltaX));
 			while(backTrack) {
@@ -200,7 +206,7 @@ void Player::update(int deltaTime, const Terrain& T) {
 				}
 			}
 		}
-		*/
+		
 
 		if(posX + width > LEVEL_WIDTH) posX = LEVEL_WIDTH - width;
 		if(posX < 0) posX = 0;
@@ -217,7 +223,7 @@ void Player::update(int deltaTime, const Terrain& T) {
 		velY = velY + (gravity * deltaTime / 1000.0);
 	}
 
-	/*
+	
 	if(checkCollision(T)) {
 		int backTrack = abs(trunc(deltaY));
 		while(backTrack) {
@@ -231,7 +237,7 @@ void Player::update(int deltaTime, const Terrain& T) {
 		}
 		grounded = true;
 	}
-	*/
+	
 
 	if(posY < 0) posY = 1;
 }

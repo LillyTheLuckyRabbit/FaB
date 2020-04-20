@@ -43,7 +43,7 @@ void gameLoop(int numPlayers) {
 	TextureWrapperStreaming terrainTexture;
 	bool updateTerrain = true;
 	terrainTexture.createBlank(LEVEL_WIDTH, LEVEL_HEIGHT);
-	terrainTexture.setBlendMode(SDL_BLENDMODE_BLEND);
+	terrainTexture.setBlendMode(SDL_BLENDMODE_MOD);
 
 	while(!quit) {
 		frameTimer.newFrame();
@@ -68,6 +68,9 @@ void gameLoop(int numPlayers) {
 			} else if(e.type == SDL_CONTROLLERBUTTONDOWN) {
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
 					players[e.cbutton.which]->inputRBDown(e);
+				}
+				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_X) {
+					players[e.cbutton.which]->inputY(e);
 				}
 			} else if(e.type == SDL_CONTROLLERBUTTONUP) {
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
@@ -95,8 +98,8 @@ void gameLoop(int numPlayers) {
 				SDL_PixelFormat* mappingFormat = SDL_AllocFormat(format);
 				Uint32* pixels = (Uint32*)terrainTexture.getPixels();
 				int pixelCount = (terrainTexture.getPitch() / 4) * terrainTexture.getHeight();
-				Uint32 noTerrain = SDL_MapRGBA(mappingFormat, 0x00, 0x00, 0x00, 0x40);
-				Uint32 transparent = SDL_MapRGBA(mappingFormat, 0xFF, 0xFF, 0xFF, 0x00);
+				Uint32 noTerrain = SDL_MapRGBA(mappingFormat, 0x22, 0x22, 0x22, 0x40);
+				Uint32 transparent = SDL_MapRGBA(mappingFormat, 0xFF, 0xFF, 0xFF, 0xFF);
 				for(int i = 0; i < pixelCount; i++) {
 					if(T.getValueAtIndex(i)) {
 						pixels[i] = transparent;
@@ -107,7 +110,6 @@ void gameLoop(int numPlayers) {
 				terrainTexture.unlockTexture();
 				updateTerrain = false;
 				SDL_FreeFormat(mappingFormat);
-				terrainTexture.setBlendMode(SDL_BLENDMODE_BLEND);
 			}
 		}
 

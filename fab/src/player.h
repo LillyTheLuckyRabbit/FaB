@@ -23,6 +23,7 @@ class Player {
 	void inputRightStickX(const SDL_Event& e);
 	void inputRightStickY(const SDL_Event& e);
 	bool inputLeftTrigger(const SDL_Event& e, Terrain& T);
+	void inputY(const SDL_Event& e);
 
 	void update(int deltaTime, const Terrain &T);
 	bool checkCollision(const Terrain &T);
