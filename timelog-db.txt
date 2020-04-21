@@ -68,3 +68,21 @@ On 4/12, I spent (unsure of the exact time, about 0.5-1 hours?) doing the follow
 			-Ended up messing up the dimensions, I'll have to come back to them later :/
 		-Created a sprite for dirt terrain
 			-I may still to tweak it to make it tile better, but this is fine for demo purposes.
+
+On 4/19, I spent most of the day doing the following:
+	-Troubleshooting the program's resolution with Will
+		-Will and I use different systems, the Windows version's camera is too low
+		-As a temporary solution, I shrunk the resolution size if the game is played on Windows.
+			-Will ended up finding a better solution later
+	-Making an algorithm for terrain generation
+		-Uses disjoint sets to create tunnels and determine if all players are in the same tunnel (at which point the algorithm is done)
+		-Created Terrain class
+		-At this time the algorithm occasionally crashes by going out of scope
+
+On 4/20, I spent less than an hour doing the following:
+	-Creating powerpoint presentation for the BYODS day
+
+On 4/21, I spent about 2 hours doing the following:
+	-Fixed the bugs with terrain generation
+		-Turns out the algorithm was sometimes going out of scope for the right/up bounds of the level
+	-Finished presentation slides with Will
