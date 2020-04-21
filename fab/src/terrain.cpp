@@ -56,9 +56,11 @@ void Terrain::generateTerrain(Player *p[4],int playerCount){
 		if (i==0) toVisit.push_back(addPos);
 		playerPositions.push_back(addPos);
 		cout << "PLAYER " << i+1 << "/" << playerCount << " at " << p[i]->getX() << "," << p[i]->getY() << endl;
-		for(int y = -1; y < p[i]->getH() + 1; y++) {
-			for(int x = -1; x < p[i]->getW() + 1; x++) {
-				l[(p[i]->getY()*LEVEL_WIDTH+1)+p[i]->getX()+x] = 0;
+		for(int y = -25; y <= 25; y++) {
+			for(int x = -25; x <= 25; x++) {
+				if(x * x + y * y < 25 * 25) {
+					l[((p[i]->getY() + 15 + y) *LEVEL_WIDTH+1)+p[i]->getX() + 15 + x] = 0;
+				}
 			}
 		}
 	}
