@@ -27,6 +27,7 @@
 #include <cstdio>
 #include <vector>
 #include <sstream>
+#include <cstring>		//Used by memcpy (according to compiler)
 
 using std::cin;
 using std::cout;

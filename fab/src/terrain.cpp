@@ -48,6 +48,8 @@ int DisjointSetBySize::Find(int element)
 void Terrain::generateTerrain(Player *p[4],int playerCount){
 	vector<int> toVisit;
 	vector<int> playerPositions;
+	toVisit.reserve(LEVEL_WIDTH*LEVEL_HEIGHT);
+	playerPositions.reserve(4);
 	//int playerCount = (sizeof(p))/(sizeof(p[0]));
 	for (int i = 0; i < playerCount; i++){ 
 		int addPos = (p[i]->getY()* LEVEL_WIDTH) + p[i]->getX();
@@ -120,7 +122,7 @@ while (!terrainDone){
 	//UP neighbor
 	//cout << "\tBEFORE UP, checking at L: " << (visitY+1)*LEVEL_WIDTH+(visitX) << " or " << "(" << visitX << "," << visitY+1 << ")" << endl;
 	//cout << "\tAlso, L has " << l[(visitY+1)*LEVEL_WIDTH+(visitX)] << endl;
-	if ((visitY < (LEVEL_HEIGHT))&&((u->Find(playerUnion)!=(u->Find((visitY+1)*LEVEL_WIDTH+(visitX)))))){
+	if ((visitY+1 < (LEVEL_HEIGHT))&&((u->Find(playerUnion)!=(u->Find((visitY+1)*LEVEL_WIDTH+(visitX)))))){
 		//cout << "\tUP\n";
 		l[(visitY+1)*LEVEL_WIDTH+(visitX)] = 0;
 		toVisit.push_back((visitY+1)*LEVEL_WIDTH+(visitX));
@@ -144,7 +146,7 @@ while (!terrainDone){
 	}
 	//cout << "3\n";
 	//RIGHT neighbor
-	if ((visitX < (LEVEL_WIDTH))&&((u->Find(playerUnion)!=(u->Find((visitY)*LEVEL_WIDTH+(visitX+1)))))){
+	if ((visitX+1 < (LEVEL_WIDTH))&&((u->Find(playerUnion)!=(u->Find((visitY)*LEVEL_WIDTH+(visitX+1)))))){
 		//cout << "\tRIGHT\n";
 		l[(visitY)*LEVEL_WIDTH+(visitX+1)] = 0;
 		toVisit.push_back((visitY)*LEVEL_WIDTH+(visitX+1));
