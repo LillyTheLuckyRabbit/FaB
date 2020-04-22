@@ -40,10 +40,31 @@ void gameLoop(int numPlayers) {
 	Text textRenderer("sprites/font.png", 17, 16);
 	stringstream hudText;
 
-	TextureWrapperStreaming terrainTexture;
+	TextureWrapperStreaming terrainMask;
 	bool updateTerrain = true;
-	terrainTexture.createBlank(LEVEL_WIDTH, LEVEL_HEIGHT);
-	terrainTexture.setBlendMode(SDL_BLENDMODE_MOD);
+	terrainMask.createBlank(LEVEL_WIDTH, LEVEL_HEIGHT);
+	terrainMask.setBlendMode(SDL_BLENDMODE_MOD);
+	if(!terrainMask.lockTexture()) {
+		cout << "Unable to lock terrain texture!" << endl;
+	} else {
+		SDL_PixelFormat* mappingFormat = SDL_AllocFormat(format);
+		Uint32* pixels = (Uint32*)terrainMask.getPixels();
+		int pixelCount = (terrainMask.getPitch() / 4) * terrainMask.getHeight();
+		Uint32 noTerrain = SDL_MapRGBA(mappingFormat, 0x22, 0x22, 0x22, 0x40);
+		Uint32 transparent = SDL_MapRGBA(mappingFormat, 0xFF, 0xFF, 0xFF, 0xFF);
+		for(int i = 0; i < pixelCount; i++) {
+			if(T.getValueAtIndex(i)) {
+				pixels[i] = transparent;
+			} else {
+				pixels[i] = noTerrain;
+			}
+		}
+		terrainMask.unlockTexture();
+		updateTerrain = false;
+		SDL_FreeFormat(mappingFormat);
+	}
+	vector<int> terrainUpdateList;
+	terrainUpdateList.clear();
 
 	while(!quit) {
 		frameTimer.newFrame();
@@ -63,14 +84,14 @@ void gameLoop(int numPlayers) {
 					players[e.caxis.which]->inputRightStickY(e);
 				}
 				if(e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT) {
-					updateTerrain = players[e.caxis.which]->inputLeftTrigger(e, T);
+					updateTerrain = players[e.caxis.which]->inputLeftTrigger(e, T, terrainUpdateList);
 				}
 			} else if(e.type == SDL_CONTROLLERBUTTONDOWN) {
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
 					players[e.cbutton.which]->inputRBDown(e);
 				}
-				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_X) {
-					players[e.cbutton.which]->inputY(e);
+				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
+					players[e.cbutton.which]->inputLBDown(e);
 				}
 			} else if(e.type == SDL_CONTROLLERBUTTONUP) {
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
@@ -91,25 +112,26 @@ void gameLoop(int numPlayers) {
 		SDL_RenderClear(gameRenderer);
 
 		// Terrain updating
-		if(updateTerrain) {
-			if(!terrainTexture.lockTexture()) {
+		if(terrainUpdateList.size()) {
+			if(!terrainMask.lockTexture()) {
 				cout << "Unable to lock terrain texture!" << endl;
 			} else {
 				SDL_PixelFormat* mappingFormat = SDL_AllocFormat(format);
-				Uint32* pixels = (Uint32*)terrainTexture.getPixels();
-				int pixelCount = (terrainTexture.getPitch() / 4) * terrainTexture.getHeight();
+				Uint32* pixels = (Uint32*)terrainMask.getPixels();
+				int pixelCount = (terrainMask.getPitch() / 4) * terrainMask.getHeight();
 				Uint32 noTerrain = SDL_MapRGBA(mappingFormat, 0x22, 0x22, 0x22, 0x40);
 				Uint32 transparent = SDL_MapRGBA(mappingFormat, 0xFF, 0xFF, 0xFF, 0xFF);
-				for(int i = 0; i < pixelCount; i++) {
-					if(T.getValueAtIndex(i)) {
-						pixels[i] = transparent;
+				for(int i = 0; i < terrainUpdateList.size(); i++) {
+					if(T.getValueAtIndex(terrainUpdateList[i])) {
+						pixels[terrainUpdateList[i]] = transparent;
 					} else {
-						pixels[i] = noTerrain;
+						pixels[terrainUpdateList[i]] = noTerrain;
 					}
 				}
-				terrainTexture.unlockTexture();
+				terrainMask.unlockTexture();
 				updateTerrain = false;
 				SDL_FreeFormat(mappingFormat);
+				terrainUpdateList.clear();
 			}
 		}
 
@@ -126,7 +148,7 @@ void gameLoop(int numPlayers) {
 					}
 				}
 			}
-			terrainTexture.render(0 + viewports[i].x, 0 + viewports[i].y, &currentCamera);
+			terrainMask.render(0 + viewports[i].x, 0 + viewports[i].y, &currentCamera);
 
 			for(int e = 0; e < numPlayers; e++) {
 				if(players[e]->getX() - currentCamera.x < currentCamera.w && players[e]->getX() - currentCamera.x > -(players[e]->getW())) {

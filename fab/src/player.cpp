@@ -18,6 +18,8 @@ Player::Player(int num) {
 	posY = rand() % (LEVEL_HEIGHT - height);
 	velX = 0;
 	velY = 0;
+	accelX = 0;
+	accelDir = 0;
 
 	camera.h = RENDER_HEIGHT;
 	camera.w = RENDER_WIDTH / 2;
@@ -83,11 +85,11 @@ Player::~Player() {
 
 void Player::inputLeftStick(const SDL_Event& e) {
 	if(e.caxis.value > 2000) {
-		velX = 400;
+		accelDir = 1;
 	} else if(e.caxis.value < -2000) {
-		velX = -400;
+		accelDir = -1;
 	} else {
-		velX = 0;
+		accelDir = 0;
 	}
 }
 
@@ -103,7 +105,7 @@ void Player::inputRightStickY(const SDL_Event& e) {
 	}
 }
 
-bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T) {
+bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terrainUpdateList) {
 	bool containsTerrain = false;
 	if(e.caxis.value > 2500) {
 		if(dig) {
@@ -126,6 +128,7 @@ bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T) {
 					for(int x = -radius; x <= radius; x++) {
 						if(x * x + y * y < radius * radius) {
 							T.setValueAtXY(centerX + x, centerY + y, 0);
+							terrainUpdateList.push_back((centerY + y) * LEVEL_WIDTH + (centerX + x));
 						}
 					}
 				}
@@ -149,15 +152,22 @@ void Player::inputRBDown(const SDL_Event& e) {
 	}
 }
 
-void Player::inputY(const SDL_Event& e) {
-	if(e.cbutton.state == SDL_PRESSED) {
-		posY -= 30;
-	}
-}
-
 void Player::inputRBUp(const SDL_Event& e) {
 	if(e.cbutton.state == SDL_RELEASED) {
 		gravity = PLAYER_HIGHGRAV;
+	}
+}
+
+void Player::inputLBDown(const SDL_Event& e) {
+	if(e.cbutton.state == SDL_PRESSED) {
+		if(dashAvail) {
+			velY = getYComp(angle, 1000);
+			velX = getXComp(angle, 1000);
+			gravity = PLAYER_HIGHGRAV;
+			grounded = false;
+			dashAvail = false;
+			dashTime = 1000;
+		}
 	}
 }
 
@@ -186,10 +196,36 @@ void Player::update(int deltaTime, const Terrain& T) {
 			camera.y += 5;
 		}
 	}
+	if(!dashAvail && dashTime > 0) {
+		dashTime -= deltaTime;
+	}
 
 	angle = getDegrees(angleX, angleY);
 
+	if(accelDir == 0) {
+		if(velX > 0 && grounded) {
+			accelX = -2000;
+		} else if(velX < 0 && grounded) {
+			accelX = 2000;
+		} else {
+			accelX = 0;
+		}
+	} else if(accelDir == 1) {
+		if(velX < 400) {
+			accelX = 2000;
+		} else {
+			accelX = -2000;
+		}
+	} else if(accelDir == -1) {
+		if(velX > -400) {
+			accelX = -2000;
+		} else {
+			accelX = 2000;
+		}
+	}
+
 	int deltaX = 0;
+	velX = trunc(velX + accelX * deltaTime / 1000.0);
 	if(velX) {
 		deltaX = trunc((velX * deltaTime) / 1000.0);
 		posX += deltaX;
@@ -199,28 +235,28 @@ void Player::update(int deltaTime, const Terrain& T) {
 	posY += deltaY;
 	if(velY >= 0) gravity = PLAYER_HIGHGRAV;
 	velY = velY + (gravity * deltaTime / 1000.0);
+	if(velY > 1000) velY = 1000;
 
 	if(checkCollision(T)) {
 		if(deltaY > 0) grounded = true;
+		if(dashTime <= 0 && !dashAvail) {
+			dashAvail = true;
+		}
 		if(checkCollision(T) < height / 2 && posY < LEVEL_HEIGHT - height) {
 			posY -= checkCollision(T);
 		} else {
 			posY -= deltaY;
-			velY = 0;
 			if(checkCollision(T)) {
 				posX -= deltaX;
+				velX = -0.1 * velX;
 			}
 		}
-		cout << posX << " " << posY << endl;
 	}
 }
 
 int Player::checkCollision(const Terrain& T) {
-	if(posX < 0 || posX > LEVEL_WIDTH - width || posY < 0) {
+	if(posX < 0 || posX > LEVEL_WIDTH - width || posY < 0 || posY > LEVEL_HEIGHT - height) {
 		return (height);
-	}
-	if(posY > LEVEL_HEIGHT - height) {
-		return (1);
 	}
 	for(int y = 0; y < height; y++) {
 		for(int x = 0; x < width; x++) {

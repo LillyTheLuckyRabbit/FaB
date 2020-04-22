@@ -29,7 +29,7 @@ bool initSdlWindow() {
 		success = false;
 	} else {
 		gameWindow = SDL_CreateWindow("FaB", SDL_WINDOWPOS_UNDEFINED,
-		                              SDL_WINDOWPOS_UNDEFINED, RENDER_WIDTH, RENDER_HEIGHT, SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
+		                              SDL_WINDOWPOS_UNDEFINED, RENDER_WIDTH, RENDER_HEIGHT, SDL_WINDOW_BORDERLESS);
 		if(gameWindow == NULL) {
 			cout << "Window could not be created! SDL_Error: " << SDL_GetError() << endl;
 		} else {

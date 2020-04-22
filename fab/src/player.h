@@ -22,8 +22,8 @@ class Player {
 	void inputRBUp(const SDL_Event& e);
 	void inputRightStickX(const SDL_Event& e);
 	void inputRightStickY(const SDL_Event& e);
-	bool inputLeftTrigger(const SDL_Event& e, Terrain& T);
-	void inputY(const SDL_Event& e);
+	bool inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terrainUpdateList);
+	void inputLBDown(const SDL_Event& e);
 
 	void update(int deltaTime, const Terrain &T);
 	int checkCollision(const Terrain &T);
@@ -41,6 +41,8 @@ class Player {
 	private:
 	int playerNumber;
 
+	int accelX;
+	int accelDir;
 	int velX;
 	int velY;
 
@@ -60,9 +62,8 @@ class Player {
 	int angleY = 0;
 
 	bool grounded;
-	
+	int dashTime;
 	bool dashAvail;
-
 	bool dig;
 
 	SDL_GameController* controllerPtr;
