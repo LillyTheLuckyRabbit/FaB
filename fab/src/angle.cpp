@@ -17,14 +17,14 @@ int getDegrees(int x, int y) {
 
 int getXComp(int deg, int mag) {
 	double xCompFloat, scalar;
-	scalar = cos((double)deg * (180 / M_PI));
+	scalar = cos((double)deg * (M_PI / 180));
 	xCompFloat = (double)mag * scalar;
-	return(-trunc(xCompFloat));
+	return(trunc(xCompFloat));
 }
 
 int getYComp(int deg, int mag) {
 	double yCompFloat, scalar;
-	scalar = sin((double)deg * (180 / M_PI));
+	scalar = sin((double)deg * (M_PI / 180));
 	yCompFloat = (double)mag * scalar;
 	return(trunc(yCompFloat));
 }

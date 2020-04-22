@@ -26,7 +26,7 @@ class Player {
 	void inputY(const SDL_Event& e);
 
 	void update(int deltaTime, const Terrain &T);
-	bool checkCollision(const Terrain &T);
+	int checkCollision(const Terrain &T);
 
 	void render(int camX, int camY, int vX, int vY, bool cross);
 

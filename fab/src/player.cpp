@@ -189,71 +189,47 @@ void Player::update(int deltaTime, const Terrain& T) {
 
 	angle = getDegrees(angleX, angleY);
 
+	int deltaX = 0;
 	if(velX) {
-		float deltaX = (velX * deltaTime) / 1000.0;
-		posX += trunc(deltaX);
-
-		
-		if(checkCollision(T)) {
-			int backTrack = abs(trunc(deltaX));
-			while(backTrack) {
-				if(velX < 0) {
-					posX++;
-					backTrack--;
-				} else {
-					posX--;
-					backTrack--;
-				}
-			}
-		}
-		
-
-		if(posX + width > LEVEL_WIDTH) posX = LEVEL_WIDTH - width;
-		if(posX < 0) posX = 0;
+		deltaX = trunc((velX * deltaTime) / 1000.0);
+		posX += deltaX;
 	}
 
-	float deltaY = ((velY * deltaTime) + .5 * gravity * (deltaTime * deltaTime) / 1000.0) / 1000.0;
-	posY += trunc(deltaY);
+	int deltaY = trunc(((velY * deltaTime) + .5 * gravity * (deltaTime * deltaTime) / 1000.0) / 1000.0);
+	posY += deltaY;
 	if(velY >= 0) gravity = PLAYER_HIGHGRAV;
-	if(posY + height > LEVEL_HEIGHT) {
-		posY = LEVEL_HEIGHT - height;
-		velY = 0;
-		grounded = true;
-	} else {
-		velY = velY + (gravity * deltaTime / 1000.0);
-	}
+	velY = velY + (gravity * deltaTime / 1000.0);
 
-	
 	if(checkCollision(T)) {
-		int backTrack = abs(trunc(deltaY));
-		while(backTrack) {
-			if(velY > 0) {
-				posY--;
-				backTrack--;
-			} else {
-				posY++;
-				backTrack--;
+		if(deltaY > 0) grounded = true;
+		if(checkCollision(T) < height / 2 && posY < LEVEL_HEIGHT - height) {
+			posY -= checkCollision(T);
+		} else {
+			posY -= deltaY;
+			velY = 0;
+			if(checkCollision(T)) {
+				posX -= deltaX;
 			}
 		}
-		grounded = true;
+		cout << posX << " " << posY << endl;
 	}
-	
-
-	if(posY < 0) posY = 1;
 }
 
-bool Player::checkCollision(const Terrain& T) {
-	if(posX <= 0 || posX >= LEVEL_WIDTH - width || posY <= 0 || posY >= LEVEL_HEIGHT - height) {
-		return (true);
+int Player::checkCollision(const Terrain& T) {
+	if(posX < 0 || posX > LEVEL_WIDTH - width || posY < 0) {
+		return (height);
+	}
+	if(posY > LEVEL_HEIGHT - height) {
+		return (1);
 	}
 	for(int y = 0; y < height; y++) {
 		for(int x = 0; x < width; x++) {
 			if(T.getValueAtXY(posX + x, posY + y)) {
-				return (true);
+				return (height - y);
 			}
 		}
 	}
-	return (false);
+	return (0);
 }
 
 void Player::render(int camX, int camY, int vX, int vY, bool cross) {
