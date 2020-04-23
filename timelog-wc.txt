@@ -45,3 +45,7 @@
 
 2020-04-20
 19:30 - 23:00 - Fixed collision detection, fixed spawning, added dash
+
+2020-04-21
+19:30 - 22:45 - Added dash graphic, fixed crash from editing OOB portion of mask texture,
+		added glock

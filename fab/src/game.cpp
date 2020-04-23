@@ -98,12 +98,12 @@ void gameLoop(int numPlayers) {
 			}
 		}
 
-		// Update entities
-
 		// Player update loop
 		for(int i = 0; i < numPlayers; i++) {
 			players[i]->update(frameTimer.getDelta(), T);
 		}
+		
+		// Update entities
 
 		// Rendering
 		SDL_SetRenderDrawColor(gameRenderer, 0x00, 0x00, 0x00, 0xFF);

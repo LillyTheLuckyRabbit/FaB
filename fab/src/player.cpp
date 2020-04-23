@@ -53,6 +53,9 @@ Player::Player(int num) {
 	if(!circle.loadFromFile("sprites/circle.png")) {
 		cout << "Failed to load the circle sprite!" << endl;
 	}
+	if(!gun.loadFromFile("sprites/gun.png")) {
+		cout << "Failed to load the gun sprite!" << endl;
+	}
 
 	if(playerNumber == 1) {
 		playerTexture.setColor(64, 200, 64);
@@ -80,7 +83,9 @@ Player::Player(int num) {
 
 	grounded = false;
 	dashAvail = true;
+	dashTime = 0;
 	dig = true;
+	alive = true;
 }
 
 Player::Player() {
@@ -226,7 +231,7 @@ void Player::update(int deltaTime, const Terrain& T) {
 	} else if(accelDir == 1) {
 		if(velX < 400) {
 			accelX = 2000;
-		} else if(grounded){
+		} else if(grounded) {
 			accelX = -2000;
 		} else {
 			accelX = 0;
@@ -234,7 +239,7 @@ void Player::update(int deltaTime, const Terrain& T) {
 	} else if(accelDir == -1) {
 		if(velX > -400) {
 			accelX = -2000;
-		} else if(grounded){
+		} else if(grounded) {
 			accelX = 2000;
 		} else {
 			accelX = 0;
@@ -295,6 +300,24 @@ void Player::render(int camX, int camY, int vX, int vY, bool cross) {
 	} else {
 		flip = SDL_FLIP_NONE;
 	}
+	SDL_RendererFlip gunFlip;
+	if((angle >= -90 && angle <= 0) || (angle <= 90 && angle >= 0)) {
+		gunFlip = SDL_FLIP_HORIZONTAL;
+	} else {
+		gunFlip = (SDL_RendererFlip)(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL);
+	}
+	int gunX = 2;
+	int gunY = 18;
+	SDL_Point gunPivot;
+	gunPivot.x = 2;
+	gunPivot.y = 4;
+	if(flip == SDL_FLIP_HORIZONTAL) {
+		gunX = 24;
+		gunY = 9;
+		gunPivot.x = 2;
+		gunPivot.y = 11;
+	}
+	gun.render((posX - camX) + vX + gunX, (posY - camY) + vY + gunY, NULL, angle, &gunPivot, gunFlip);
 	playerTexture.render((posX - camX) + vX, (posY - camY) + vY, NULL, 0, NULL, flip);
 	int eyeX = 10;
 	if(flip == SDL_FLIP_HORIZONTAL) eyeX = 11;

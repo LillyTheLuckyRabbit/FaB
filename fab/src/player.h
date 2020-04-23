@@ -65,6 +65,7 @@ class Player {
 	int dashTime;
 	bool dashAvail;
 	bool dig;
+	bool alive;
 
 	SDL_GameController* controllerPtr;
 
@@ -74,6 +75,7 @@ class Player {
 	TextureWrapper eyeTexture;
 	TextureWrapper crossHair;
 	TextureWrapper circle;
+	TextureWrapper gun;
 };
 
 #endif
