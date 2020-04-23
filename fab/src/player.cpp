@@ -27,6 +27,9 @@ Player::Player(int num) {
 	if(camera.x < 0) {
 		camera.x = 0;
 	}
+	if(camera.x > LEVEL_WIDTH - camera.w) {
+		camera.x = LEVEL_WIDTH - camera.w;
+	}
 	camera.y = posY - RENDER_HEIGHT / 4;
 	if(camera.y < 0) {
 		camera.y = 0;
