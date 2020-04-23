@@ -182,7 +182,7 @@ int Terrain::getValueAtIndex(int index) const{
 	if(index < l.size()) {
 		return l[index];
 	} else {
-		return(0);
+		return(-1);
 	}
 }
 

@@ -47,21 +47,29 @@ Player::Player(int num) {
 	if(!crossHair.loadFromFile("sprites/crosshair.png")) {
 		cout << "Failed to load the crosshair sprite!" << endl;
 	}
+	if(!circle.loadFromFile("sprites/circle.png")) {
+		cout << "Failed to load the circle sprite!" << endl;
+	}
 
 	if(playerNumber == 1) {
 		playerTexture.setColor(64, 200, 64);
 		crossHair.setColor(64, 200, 64);
+		circle.setColor(191, 55, 191);
 	} else if(playerNumber == 2) {
 		playerTexture.setColor(200, 64, 64);
 		crossHair.setColor(200, 64, 64);
+		circle.setColor(55, 191, 191);
 	} else if(playerNumber == 3) {
 		playerTexture.setColor(64, 64, 200);
 		crossHair.setColor(64, 64, 200);
+		circle.setColor(191, 191, 55);
 	} else if(playerNumber == 4) {
 		playerTexture.setColor(200, 64, 200);
 		crossHair.setColor(200, 64, 200);
+		circle.setColor(55, 191, 55);
 	}
 
+	circle.setBlendMode(SDL_BLENDMODE_ADD);
 	crossHair.setAlpha(128);
 
 	health = 100;
@@ -115,7 +123,7 @@ bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terra
 			for(int y = -radius; y <= radius; y++) {
 				for(int x = -radius; x <= radius; x++) {
 					if(x * x + y * y < radius * radius) {
-						if(T.getValueAtXY(centerX + x, centerY + y)) {
+						if(T.getValueAtXY(centerX + x, centerY + y) == 1) {
 							containsTerrain = true;
 							break;
 						}
@@ -127,8 +135,10 @@ bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terra
 				for(int y = -radius; y <= radius; y++) {
 					for(int x = -radius; x <= radius; x++) {
 						if(x * x + y * y < radius * radius) {
-							T.setValueAtXY(centerX + x, centerY + y, 0);
-							terrainUpdateList.push_back((centerY + y) * LEVEL_WIDTH + (centerX + x));
+							if(T.getValueAtXY(centerX + x, centerY + y) == 1) {
+								T.setValueAtXY(centerX + x, centerY + y, 0);
+								terrainUpdateList.push_back((centerY + y) * LEVEL_WIDTH + (centerX + x));
+							}
 						}
 					}
 				}
@@ -213,14 +223,18 @@ void Player::update(int deltaTime, const Terrain& T) {
 	} else if(accelDir == 1) {
 		if(velX < 400) {
 			accelX = 2000;
-		} else {
+		} else if(grounded){
 			accelX = -2000;
+		} else {
+			accelX = 0;
 		}
 	} else if(accelDir == -1) {
 		if(velX > -400) {
 			accelX = -2000;
-		} else {
+		} else if(grounded){
 			accelX = 2000;
+		} else {
+			accelX = 0;
 		}
 	}
 
@@ -235,7 +249,6 @@ void Player::update(int deltaTime, const Terrain& T) {
 	posY += deltaY;
 	if(velY >= 0) gravity = PLAYER_HIGHGRAV;
 	velY = velY + (gravity * deltaTime / 1000.0);
-	if(velY > 1000) velY = 1000;
 
 	if(checkCollision(T)) {
 		if(deltaY > 0) grounded = true;
@@ -244,6 +257,10 @@ void Player::update(int deltaTime, const Terrain& T) {
 		}
 		if(checkCollision(T) < height / 2 && posY < LEVEL_HEIGHT - height) {
 			posY -= checkCollision(T);
+			velY = 0;
+		} else if(posY > LEVEL_HEIGHT - height) {
+			posY -= deltaY;
+			velY = 0;
 		} else {
 			posY -= deltaY;
 			if(checkCollision(T)) {
@@ -288,6 +305,7 @@ void Player::render(int camX, int camY, int vX, int vY, bool cross) {
 		playerCenter.y = 0;
 		crossHair.render(posX - camX + vX + 100, posY - camY + vY + height / 2, NULL, angle, &playerCenter);
 	}
+	if(dashTime > 0) circle.render(posX - camX + vX - 5, posY - camY + vY - 5);
 }
 
 void Player::halveCameraHeight() {

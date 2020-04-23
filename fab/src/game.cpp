@@ -41,7 +41,6 @@ void gameLoop(int numPlayers) {
 	stringstream hudText;
 
 	TextureWrapperStreaming terrainMask;
-	bool updateTerrain = true;
 	terrainMask.createBlank(LEVEL_WIDTH, LEVEL_HEIGHT);
 	terrainMask.setBlendMode(SDL_BLENDMODE_MOD);
 	if(!terrainMask.lockTexture()) {
@@ -50,8 +49,8 @@ void gameLoop(int numPlayers) {
 		SDL_PixelFormat* mappingFormat = SDL_AllocFormat(format);
 		Uint32* pixels = (Uint32*)terrainMask.getPixels();
 		int pixelCount = (terrainMask.getPitch() / 4) * terrainMask.getHeight();
-		Uint32 noTerrain = SDL_MapRGBA(mappingFormat, 0x22, 0x22, 0x22, 0x40);
-		Uint32 transparent = SDL_MapRGBA(mappingFormat, 0xFF, 0xFF, 0xFF, 0xFF);
+		Uint32 noTerrain = SDL_MapRGB(mappingFormat, 0x22, 0x22, 0x22);
+		Uint32 transparent = SDL_MapRGB(mappingFormat, 0xFF, 0xFF, 0xFF);
 		for(int i = 0; i < pixelCount; i++) {
 			if(T.getValueAtIndex(i)) {
 				pixels[i] = transparent;
@@ -60,7 +59,6 @@ void gameLoop(int numPlayers) {
 			}
 		}
 		terrainMask.unlockTexture();
-		updateTerrain = false;
 		SDL_FreeFormat(mappingFormat);
 	}
 	vector<int> terrainUpdateList;
@@ -84,7 +82,7 @@ void gameLoop(int numPlayers) {
 					players[e.caxis.which]->inputRightStickY(e);
 				}
 				if(e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT) {
-					updateTerrain = players[e.caxis.which]->inputLeftTrigger(e, T, terrainUpdateList);
+					players[e.caxis.which]->inputLeftTrigger(e, T, terrainUpdateList);
 				}
 			} else if(e.type == SDL_CONTROLLERBUTTONDOWN) {
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
@@ -118,10 +116,9 @@ void gameLoop(int numPlayers) {
 			} else {
 				SDL_PixelFormat* mappingFormat = SDL_AllocFormat(format);
 				Uint32* pixels = (Uint32*)terrainMask.getPixels();
-				int pixelCount = (terrainMask.getPitch() / 4) * terrainMask.getHeight();
-				Uint32 noTerrain = SDL_MapRGBA(mappingFormat, 0x22, 0x22, 0x22, 0x40);
-				Uint32 transparent = SDL_MapRGBA(mappingFormat, 0xFF, 0xFF, 0xFF, 0xFF);
-				for(int i = 0; i < terrainUpdateList.size(); i++) {
+				Uint32 noTerrain = SDL_MapRGB(mappingFormat, 0x22, 0x22, 0x22);
+				Uint32 transparent = SDL_MapRGB(mappingFormat, 0xFF, 0xFF, 0xFF);
+				for(size_t i = 0; i < terrainUpdateList.size(); i++) {
 					if(T.getValueAtIndex(terrainUpdateList[i])) {
 						pixels[terrainUpdateList[i]] = transparent;
 					} else {
@@ -129,7 +126,6 @@ void gameLoop(int numPlayers) {
 					}
 				}
 				terrainMask.unlockTexture();
-				updateTerrain = false;
 				SDL_FreeFormat(mappingFormat);
 				terrainUpdateList.clear();
 			}

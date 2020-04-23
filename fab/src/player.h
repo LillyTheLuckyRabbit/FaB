@@ -73,6 +73,7 @@ class Player {
 	TextureWrapper playerTexture;
 	TextureWrapper eyeTexture;
 	TextureWrapper crossHair;
+	TextureWrapper circle;
 };
 
 #endif
