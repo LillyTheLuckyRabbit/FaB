@@ -53,7 +53,7 @@ Player::Player(int num) {
 	if(!circle.loadFromFile("sprites/circle.png")) {
 		cout << "Failed to load the circle sprite!" << endl;
 	}
-	if(!gun.loadFromFile("sprites/gun.png")) {
+	if(!gun.loadFromFile("sprites/gunLarge.png")) {
 		cout << "Failed to load the gun sprite!" << endl;
 	}
 
