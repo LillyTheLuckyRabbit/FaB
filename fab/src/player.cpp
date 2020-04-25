@@ -331,7 +331,7 @@ void Player::render(int camX, int camY, int vX, int vY, bool cross) {
 		playerCenter.y = 0;
 		crossHair.render(posX - camX + vX + 100, posY - camY + vY + height / 2, NULL, angle, &playerCenter);
 	}
-	if(dashTime > 0) circle.render(posX - camX + vX - 5, posY - camY + vY - 5);
+	if(dashTime > 0) circle.render(posX - camX + vX - (circle.getWidth() / 2 - width / 2), posY - camY + vY - (circle.getHeight() / 2 - height / 2));
 }
 
 void Player::halveCameraHeight() {
