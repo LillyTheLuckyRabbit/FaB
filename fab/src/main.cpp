@@ -10,13 +10,6 @@
 #include "text.h"
 #include "game.h"
 
-using std::cin;
-using std::cout;
-using std::endl;
-using std::string;
-using std::vector;
-using std::stringstream;
-
 // Globals
 SDL_Window* gameWindow = NULL;
 SDL_Renderer* gameRenderer = NULL;

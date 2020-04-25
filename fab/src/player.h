@@ -5,12 +5,13 @@
 #include "constants.h"
 #include "texture.h"
 #include "terrain.h"
+#include "text.h"
 
 class Terrain;
 
 class Player {
 	public:
-	Player(int num);
+	Player(int num, int scoreToWin);
 	Player();
 	~Player();
 
@@ -29,6 +30,7 @@ class Player {
 	int checkCollision(const Terrain &T);
 
 	void render(int camX, int camY, int vX, int vY, bool cross);
+	void renderHud(int camX, int camY, int vX, int vY);
 
 	int getX() const { return posX; }
 	int getY() const { return posY; }
@@ -56,6 +58,7 @@ class Player {
 
 	int health;
 	int score;
+	int goal;
 
 	int angle = 0;
 	int angleX = 1;
@@ -76,6 +79,7 @@ class Player {
 	TextureWrapper crossHair;
 	TextureWrapper circle;
 	TextureWrapper gun;
+	Text textRenderer;
 };
 
 #endif

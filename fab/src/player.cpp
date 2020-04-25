@@ -8,7 +8,7 @@
 
 #include "angle.h"
 
-Player::Player(int num) {
+Player::Player(int num, int scoreToWin) {
 	playerNumber = num;
 	controllerPtr = SDL_GameControllerOpen(playerNumber - 1);
 
@@ -60,26 +60,29 @@ Player::Player(int num) {
 	if(playerNumber == 1) {
 		playerTexture.setColor(64, 200, 64);
 		crossHair.setColor(64, 200, 64);
-		circle.setColor(191, 55, 191);
+		circle.setColor(64, 200, 64);
 	} else if(playerNumber == 2) {
 		playerTexture.setColor(200, 64, 64);
 		crossHair.setColor(200, 64, 64);
-		circle.setColor(55, 191, 191);
+		circle.setColor(200, 64, 64);
 	} else if(playerNumber == 3) {
 		playerTexture.setColor(64, 64, 200);
 		crossHair.setColor(64, 64, 200);
-		circle.setColor(191, 191, 55);
+		circle.setColor(64, 64, 200);
 	} else if(playerNumber == 4) {
 		playerTexture.setColor(200, 64, 200);
 		crossHair.setColor(200, 64, 200);
-		circle.setColor(55, 191, 55);
+		circle.setColor(200, 64, 200);
 	}
 
 	circle.setBlendMode(SDL_BLENDMODE_ADD);
 	crossHair.setAlpha(128);
 
+	textRenderer.loadFont("sprites/font.png", 17, 16);
+	
 	health = 100;
 	score = 0;
+	goal = scoreToWin;
 
 	grounded = false;
 	dashAvail = true;
@@ -271,6 +274,7 @@ void Player::update(int deltaTime, const Terrain& T) {
 			velY = 0;
 		} else {
 			posY -= deltaY;
+			if(deltaY < 0) velY = velY * -0.1;
 			if(checkCollision(T)) {
 				posX -= deltaX;
 				velX = -0.1 * velX;
@@ -332,6 +336,17 @@ void Player::render(int camX, int camY, int vX, int vY, bool cross) {
 		crossHair.render(posX - camX + vX + 100, posY - camY + vY + height / 2, NULL, angle, &playerCenter);
 	}
 	if(dashTime > 0) circle.render(posX - camX + vX - (circle.getWidth() / 2 - width / 2), posY - camY + vY - (circle.getHeight() / 2 - height / 2));
+}
+
+void Player::renderHud(int camX, int camY, int vX, int vY) {
+	stringstream hudText;
+	hudText.str("");
+	hudText << "Health: " << health;
+	textRenderer.render(textRenderer.getFontW() + vX, camera.h - textRenderer.getFontH() - 4 + vY, hudText.str());
+	hudText.str("");
+	hudText << "Score: " << score << "/" << goal;
+	textRenderer.render(camera.w - ((hudText.str().length() + 1) * textRenderer.getFontW()) + vX, camera.h - textRenderer.getFontH() - 4 + vY, hudText.str());
+
 }
 
 void Player::halveCameraHeight() {

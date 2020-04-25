@@ -1,8 +1,18 @@
 #include "text.h"
 
+Text::Text() {
+	fontH = 0;
+	fontW = 0;
+}
+
 Text::Text(string pathToFont, int h, int w) {
+	loadFont(pathToFont, h, w);
+}
+
+void Text::loadFont(string pathToFont, int h, int w) {
+	bitmapFont.free();
 	if(!bitmapFont.loadFromFile(pathToFont)) {
-		cout << "Failed to load the player sprite!" << endl;
+		cout << "Failed to load the font sprite!" << endl;
 	}
 	fontH = h;
 	fontW = w;

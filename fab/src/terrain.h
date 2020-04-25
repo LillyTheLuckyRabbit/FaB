@@ -11,8 +11,6 @@
 #include "common.h"
 #include "player.h"
 
-using namespace std;
-
 class Player;
 
 /* The Disjoint Set API is implemented as a c++ interface, 

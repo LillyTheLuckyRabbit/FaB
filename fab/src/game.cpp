@@ -10,7 +10,7 @@ void gameLoop(int numPlayers) {
 
 	Player* players[4];
 	for(int i = 0; i < numPlayers; i++) {
-		players[i] = new Player(i + 1);
+		players[i] = new Player(i + 1, 15);
 		if(numPlayers > 2) players[i]->halveCameraHeight();
 	}
 
@@ -35,10 +35,6 @@ void gameLoop(int numPlayers) {
 
 	TextureWrapper dirtTexture;
 	dirtTexture.loadFromFile("sprites/dirt.png");
-
-	int scoreToWin = 15;
-	Text textRenderer("sprites/font.png", 17, 16);
-	stringstream hudText;
 
 	TextureWrapperStreaming terrainMask;
 	terrainMask.createBlank(LEVEL_WIDTH, LEVEL_HEIGHT);
@@ -157,13 +153,7 @@ void gameLoop(int numPlayers) {
 					}
 				}
 			}
-
-			hudText.str("");
-			hudText << "Health: " << players[i]->getHealth();
-			textRenderer.render(textRenderer.getFontW() + viewports[i].x, viewports[i].h - textRenderer.getFontH() - 4 + viewports[i].y, hudText.str());
-			hudText.str("");
-			hudText << "Score: " << players[i]->getScore() << "/" << scoreToWin;
-			textRenderer.render(viewports[i].w - ((hudText.str().length() + 1) * textRenderer.getFontW()) + viewports[i].x, viewports[i].h - textRenderer.getFontH() - 4 + viewports[i].y, hudText.str());
+			players[i]->renderHud(currentCamera.x, currentCamera.y, viewports[i].x, viewports[i].y);
 		}
 		SDL_RenderSetClipRect(gameRenderer, NULL);
 		SDL_RenderPresent(gameRenderer);
