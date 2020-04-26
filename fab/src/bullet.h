@@ -13,7 +13,7 @@ class Terrain;
 
 class Bullet {
 	public:
-	Bullet(int pNum, int iPosX, int iPosY, int iVelx, int iVelY, string texturePath, int iDam, int iGrav, int iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer);
+	Bullet(int pNum, int iPosX, int iPosY, int iVelx, int iVelY, string texturePath, int iDam, int iGrav, double iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer);
 	bool update(int deltaTime, Terrain& T, Player* (&players)[4], int numPlayers);  //return 'true' to delete
 	bool update(int deltaTime, vector<int> &terrainUpdateList, Terrain& T, Player* (&players)[4], int numPlayers);
 	void render(int camX, int camY, int vX, int vY);
@@ -28,7 +28,7 @@ class Bullet {
 	int posY;
 	int velX;
 	int velY;
-	int accelX;   //Horizontal acceleration
+	double accelX;   //Horizontal acceleration
 	int gravity;  //vertical acceleration; negative values indicate floating up (e.g., flame-thrower projectile)
 	int width;
 	int height;
@@ -47,7 +47,7 @@ class Bullet {
 
 class Weapon {
 	public:
-	Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, int iDam, int iGrav = 0, int iAX = 0, int iRad = 4, bool iTime = false, int iLifetime = 0, double iBounce = 1.0, int iNumBounce = 0, bool iPlayer = true);
+	Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, int iDam, int iGrav = 0, double iAX = 0, int iRad = 4, bool iTime = false, int iLifetime = 0, double iBounce = 1.0, int iNumBounce = 0, bool iPlayer = true);
 	int getAmmo() { return ammo; }
 	int getTotal() { return totalAmmo; }
 	void shoot(vector<Bullet>& bulletVec, int playerNum, int angle, int pCenterX, int pCenterY);
@@ -68,7 +68,7 @@ class Weapon {
 
 	// Stats which will be passed on to the bullet
 	string bulletTexturePath;
-	int accelX;         //Horizontal acceleration
+	double accelX;         //Horizontal acceleration. accelX == 1.0 = same speed, accelX < 1.0 = slows down.
 	int gravity;        //vertical acceleration; negative values indicate floating up (e.g., flame-thrower projectile)
 	int damage;         //Damage bullet deals per hitting player (player health max = 100.0)
 	int radius;         //Radius of terrain affected by the bullet

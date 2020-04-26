@@ -13,6 +13,10 @@
 //Level constants
 #define RENDER_WIDTH 1600
 #define RENDER_HEIGHT 900
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#define RENDER_WIDTH 1600
+#define RENDER_HEIGHT 880
+#endif
 #define LEVEL_WIDTH 4800
 #define LEVEL_HEIGHT 1800
 

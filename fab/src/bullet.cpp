@@ -5,7 +5,7 @@
 
 #include "bullet.h"
 
-Bullet::Bullet(int pNum, int iPosX, int iPosY, int iVelx, int iVelY, string texturePath, int iDam, int iGrav, int iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer) {
+Bullet::Bullet(int pNum, int iPosX, int iPosY, int iVelx, int iVelY, string texturePath, int iDam, int iGrav, double iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer) {
 	playerNum = pNum;
 	posX = iPosX;
 	posY = iPosY;
@@ -33,8 +33,9 @@ Bullet::Bullet(int pNum, int iPosX, int iPosY, int iVelx, int iVelY, string text
 
 bool Bullet::update(int deltaTime, vector<int> &terrainUpdateList, Terrain& T, Player* (&players)[4], int numPlayers) {
 	int deltaX = 0;
-	velX = trunc(velX + accelX * deltaTime / 1000.0);
+	velX = trunc(velX + deltaTime / 1000.0);
 	if(velX) {
+		velX = trunc(velX * accelX);
 		deltaX = trunc((velX * deltaTime) / 1000.0);
 		posX += deltaX;
 	}
@@ -92,6 +93,10 @@ bool Bullet::update(int deltaTime, vector<int> &terrainUpdateList, Terrain& T, P
 			numBounces--;
 		}
 	}
+	if(timerBullet){//Bullet won't last forever, check if it should expire.
+		lifetime--;
+		if (lifetime < 0) return true; //delete boolit
+	}
 
 	return(false);
 }
@@ -109,7 +114,7 @@ void Bullet::reverseVel(int pNum) {
 	velY = -velY;
 }
 
-Weapon::Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, int iDam, int iGrav, int iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer) {
+Weapon::Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, int iDam, int iGrav, double iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer) {
 	weaponName = name;
 	totalAmmo = iAmmo;
 	ammo = iAmmo;

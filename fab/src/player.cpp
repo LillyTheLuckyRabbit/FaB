@@ -90,12 +90,18 @@ Player::Player(int num, int scoreToWin) {
 	dashAvail = true;
 	dashTime = 0;
 	dig = true;
-	shoot = true;
+	shoot = false;
 	alive = true;
 
-	for(int i = 0; i < 4; i++) {
-		weaponInv.emplace_back("Peashooter", 4, 500, 50, 2000, "sprites/bullet.png", 20);
-	}
+	//	Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, double iDam, int iGrav = 0, double iAX = 0, int iRad = 4, bool iTime = false, int iLifetime = 0, double iBounce = 1.0, int iNumBounce = 0, bool iPlayer = true);
+
+	//Test weapon weaponInv.emplace_back("Peashooter", 4, 500, 50, 2000, "sprites/bullet.png", 20);
+	//for(int i = 0; i < 4; i++) {
+		weaponInv.emplace_back("Six shooter", 6, 1000, 150, 1800, "sprites/bullet.png", 20, 0, 1.0, 5);
+		weaponInv.emplace_back("Flamethrower", 50, 1250, 10, 450, "sprites/fire.png", 2, -200, 0.97, 2, true, 75, 0.1, -1);
+		weaponInv.emplace_back("Mine", 2, 2000, 400, 600, "sprites/bomb.png", 2, 500, 0.95, 10, true, 10000, 0.3, -1);
+		weaponInv.emplace_back("Leighzuurg", 2, 500, 50, 1000, "sprites/laser.png", 20, 0, 1.0, 10, false, 0, 1.0, 3);
+	//}
 }
 
 Player::Player() {
@@ -178,15 +184,14 @@ bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terra
 void Player::inputRightTrigger(const SDL_Event& e, vector<Bullet>& bulletVec) {
 	if(alive) {
 		if(e.caxis.value > 2500) {
-			if(shoot) {
-				weaponInv[currentWeapon].shoot(bulletVec, playerNumber, angle, posX + width / 2, posY + height / 2);
-				shoot = false;
-			}
-		} else if(e.caxis.value == 0) {
 			shoot = true;
+			
+		} else if(e.caxis.value == 0) {
+			shoot = false;
 		}
 	}
 }
+
 
 void Player::inputRBDown(const SDL_Event& e) {
 	if(alive) {
@@ -216,7 +221,7 @@ void Player::inputLBDown(const SDL_Event& e) {
 				gravity = PLAYER_HIGHGRAV;
 				grounded = false;
 				dashAvail = false;
-				dashTime = 1000;
+				dashTime = 500;
 			}
 		}
 	}
@@ -347,6 +352,14 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 					i->reverseVel(playerNumber);
 				}
 			}
+		}
+	}
+	
+	//BINNY, WHY U NO SCHUUT?
+	if(alive){
+		if(shoot) {
+				weaponInv[currentWeapon].shoot(bulletVec, playerNumber, angle, posX + width / 2, posY + height / 2);
+				//shoot = false;
 		}
 	}
 
