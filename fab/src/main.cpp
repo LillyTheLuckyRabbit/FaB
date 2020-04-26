@@ -41,6 +41,7 @@ bool initSdlWindow() {
 				cout << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << endl;
 				success = false;
 			}
+			Mix_AllocateChannels(32);
 		}
 	}
 	return (success);

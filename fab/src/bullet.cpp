@@ -98,6 +98,10 @@ bool Bullet::update(int deltaTime, vector<int> &terrainUpdateList, Terrain& T, P
 		if (lifetime < 0) return true; //delete boolit
 	}
 
+	if((posX < 0 || posY < 0) || (posX > LEVEL_WIDTH || posY > LEVEL_HEIGHT)) {
+		return(true);
+	}
+
 	return(false);
 }
 

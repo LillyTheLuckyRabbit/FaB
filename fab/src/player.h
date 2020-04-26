@@ -96,6 +96,15 @@ class Player {
 	TextureWrapper gun;
 	TextureWrapper calamari;
 	Text textRenderer;
+
+	Mix_Chunk* jumpSnd;
+	Mix_Chunk* deadSnd;
+	Mix_Chunk* respawnSnd;
+	Mix_Chunk* reflectSnd;
+	Mix_Chunk* dashSnd;
+	Mix_Chunk* digSnd;
+	Mix_Chunk* walkLoopSnd;
+	int walkLoopChnl;
 };
 
 #endif

@@ -93,15 +93,46 @@ Player::Player(int num, int scoreToWin) {
 	shoot = false;
 	alive = true;
 
+	jumpSnd = Mix_LoadWAV("sound/jump.wav");
+	if(jumpSnd == NULL) {
+		cout << "Failed to load jump sound." << endl;
+	}
+	deadSnd = Mix_LoadWAV("sound/dead.wav");
+	if(deadSnd == NULL) {
+		cout << "Failed to load death sound." << endl;
+	}
+	respawnSnd = Mix_LoadWAV("sound/respawn.wav");
+	if(respawnSnd == NULL) {
+		cout << "Failed to load respawn jingle." << endl;
+	}
+	dashSnd = Mix_LoadWAV("sound/dash.wav");
+	if(dashSnd == NULL) {
+		cout << "Failed to load dash sound." << endl;
+	}
+	reflectSnd = Mix_LoadWAV("sound/reflect.wav");
+	if(reflectSnd == NULL) {
+		cout << "Failed to load reflect sound." << endl;
+	}
+	digSnd = Mix_LoadWAV("sound/dig.wav");
+	if(digSnd == NULL) {
+		cout << "Failed to load dig sound." << endl;
+	}
+	walkLoopSnd = Mix_LoadWAV("sound/walkLoop.wav");
+	if(walkLoopSnd == NULL) {
+		cout << "Failed to load walk looop sound." << endl;
+	}
+	walkLoopChnl = Mix_PlayChannel(-1, walkLoopSnd, -1);
+	if(walkLoopChnl == -1) {
+		cout << "Failed to allocate channel for walk loop!" << endl;
+	}
+	Mix_Pause(walkLoopChnl);
+
 	//	Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, double iDam, int iGrav = 0, double iAX = 0, int iRad = 4, bool iTime = false, int iLifetime = 0, double iBounce = 1.0, int iNumBounce = 0, bool iPlayer = true);
 
-	//Test weapon weaponInv.emplace_back("Peashooter", 4, 500, 50, 2000, "sprites/bullet.png", 20);
-	//for(int i = 0; i < 4; i++) {
-		weaponInv.emplace_back("Six shooter", 6, 1000, 150, 1800, "sprites/bullet.png", 20, 0, 1.0, 5);
-		weaponInv.emplace_back("Flamethrower", 50, 1250, 10, 450, "sprites/fire.png", 2, -200, 0.97, 2, true, 75, 0.1, -1);
-		weaponInv.emplace_back("Mine", 2, 2000, 400, 600, "sprites/bomb.png", 2, 500, 0.95, 10, true, 10000, 0.3, -1);
-		weaponInv.emplace_back("Leighzuurg", 2, 500, 50, 1000, "sprites/laser.png", 20, 0, 1.0, 10, false, 0, 1.0, 3);
-	//}
+	weaponInv.emplace_back("Six shooter", 6, 1000, 300, 1800, "sprites/bullet.png", 20, 0, 1.0, 5);
+	weaponInv.emplace_back("Flamethrower", 50, 1250, 10, 450, "sprites/fire.png", 2, -200, 0.97, 2, true, 75, 0.1, -1);
+	weaponInv.emplace_back("Mine", 2, 2000, 400, 600, "sprites/bomb.png", 2, 500, 0.95, 10, true, 10000, 0.3, -1);
+	weaponInv.emplace_back("Leighzuurg", 2, 500, 50, 1000, "sprites/laser.png", 20, 0, 1.0, 10, false, 0, 1.0, 3);
 }
 
 Player::Player() {
@@ -130,13 +161,13 @@ void Player::inputLeftStick(const SDL_Event& e) {
 }
 
 void Player::inputRightStickX(const SDL_Event& e) {
-	if(e.caxis.value > 2500 || e.caxis.value < -2500) {
+	if(e.caxis.value > 500 || e.caxis.value < -500) {
 		angleX = e.caxis.value;
 	}
 }
 
 void Player::inputRightStickY(const SDL_Event& e) {
-	if(e.caxis.value > 2500 || e.caxis.value < -2500) {
+	if(e.caxis.value > 500 || e.caxis.value < -500) {
 		angleY = e.caxis.value;
 	}
 }
@@ -171,6 +202,7 @@ bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terra
 						}
 					}
 					dig = false;
+					Mix_PlayChannel(-1, digSnd, 0);
 				}
 			}
 		} else if(e.caxis.value == 0) {
@@ -201,6 +233,7 @@ void Player::inputRBDown(const SDL_Event& e) {
 				posY -= 1;
 				gravity = PLAYER_LOWGRAV;
 				grounded = false;
+				Mix_PlayChannel(-1, jumpSnd, 0);
 			}
 		}
 	}
@@ -222,6 +255,7 @@ void Player::inputLBDown(const SDL_Event& e) {
 				grounded = false;
 				dashAvail = false;
 				dashTime = 500;
+				Mix_PlayChannel(-1, dashSnd, 0);
 			}
 		}
 	}
@@ -319,15 +353,35 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 			if(checkCollision(T)) {
 				posX -= deltaX;
 				velX = -0.1 * velX;
+				if(Mix_Paused(walkLoopChnl) == 0) {
+					Mix_Pause(walkLoopChnl);
+				}
 			}
+		}
+	}
+
+	if(grounded) {
+		if(deltaX) {
+			if(Mix_Paused(walkLoopChnl)) {
+				Mix_Resume(walkLoopChnl);
+			}
+		} else {
+			if(Mix_Paused(walkLoopChnl) == 0) {
+				Mix_Pause(walkLoopChnl);
+			}
+		}
+	} else {
+		if(Mix_Paused(walkLoopChnl) == 0) {
+			Mix_Pause(walkLoopChnl);
 		}
 	}
 
 	weaponInv[currentWeapon].update(deltaTime);
 
-	if(health <= 0) {
+	if(health <= 0 && alive) {
 		health = 0;
 		alive = false;
+		Mix_PlayChannel(-1, deadSnd, 0);
 	}
 
 	if(!alive) {
@@ -340,6 +394,7 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 		respawnTime = 10000;
 		posX = rand() % (LEVEL_WIDTH - width);
 		posY = rand() % (LEVEL_HEIGHT - height);
+		Mix_PlayChannel(-1, respawnSnd, 0);
 	}
 
 	if(dashTime > 0) {
@@ -350,16 +405,15 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 			if(i->getX() + i->getH() >= centerX - radius && i->getX() <= centerX + radius) {
 				if(i->getY() + i->getH() >= centerY - radius && i->getY() <= centerY + radius) {	
 					i->reverseVel(playerNumber);
+					Mix_PlayChannel(-1, reflectSnd, 0);
 				}
 			}
 		}
 	}
 	
-	//BINNY, WHY U NO SCHUUT?
 	if(alive){
 		if(shoot) {
 				weaponInv[currentWeapon].shoot(bulletVec, playerNumber, angle, posX + width / 2, posY + height / 2);
-				//shoot = false;
 		}
 	}
 
