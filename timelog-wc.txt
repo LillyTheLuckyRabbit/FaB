@@ -54,3 +54,7 @@
 14:30 - 16:00 - Moved HUD rendering code into 'Player' class, improved dash bubble texture
 19:45 - 23:30 - Added death, respawning, a weapon, reflecting using the dash, and a
 		win condition.
+
+2020-04-26
+14:30 - 15:00 - Added weapon switching and fixed bullet double update bug.
+15:15 - 17:00 - Made sound effects
