@@ -14,7 +14,6 @@ void gameLoop(int numPlayers) {
 		if(numPlayers > 2) players[i]->halveCameraHeight();
 	}
 
-	cout << "Testing terrain generator!\n";
 	Terrain T(LEVEL_WIDTH,LEVEL_HEIGHT);
 	T.generateTerrain(players,numPlayers);
 
@@ -92,6 +91,18 @@ void gameLoop(int numPlayers) {
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
 					players[e.cbutton.which]->inputLBDown(e);
 				}
+				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP) {
+					players[e.cbutton.which]->switchWeapon(0);
+				}
+				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) {
+					players[e.cbutton.which]->switchWeapon(1);
+				}
+				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN) {
+					players[e.cbutton.which]->switchWeapon(2);
+				}
+				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT) {
+					players[e.cbutton.which]->switchWeapon(3);
+				}
 			} else if(e.type == SDL_CONTROLLERBUTTONUP) {
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
 					players[e.cbutton.which]->inputRBUp(e);
@@ -105,11 +116,12 @@ void gameLoop(int numPlayers) {
 		}
 		
 		// Update entities
-		for(auto i = bulletVec.begin(); i != bulletVec.end(); i++) {
+		for(auto i = bulletVec.begin(); i != bulletVec.end();) {
 			if(i->update(frameTimer.getDelta(), terrainUpdateList, T, players, numPlayers)) {
-				bulletVec.erase(i);
-				i = bulletVec.begin();
+				i = bulletVec.erase(i);
 				if(bulletVec.empty()) break;
+			} else {
+				i++;
 			}
 		}
 

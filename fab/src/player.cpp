@@ -222,6 +222,12 @@ void Player::inputLBDown(const SDL_Event& e) {
 	}
 }
 
+void Player::switchWeapon(int wepNum) {
+	if(wepNum < 4 && wepNum >= 0) {
+		currentWeapon = wepNum;
+	} 
+}
+
 bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) {
 	if(posX - camera.x < camera.w / 6 && camera.x > 0) {
 		camera.x -= 2;
@@ -424,7 +430,7 @@ void Player::renderHud(int camX, int camY, int vX, int vY) {
 	}
 
 	hudText.str("");
-	hudText << weaponInv[currentWeapon].getName();
+	hudText << currentWeapon + 1 << ". " << weaponInv[currentWeapon].getName();
 	textRenderer.render(textRenderer.getFontW() + vX, camera.h - 3 * textRenderer.getFontH() - 4 + vY, hudText.str());
 
 	hudText.str("");
@@ -433,7 +439,7 @@ void Player::renderHud(int camX, int camY, int vX, int vY) {
 
 	if(!alive) {
 		hudText.str("");
-		hudText << "Repawning in " << respawnTime / 1000 << "...";
+		hudText << "Repawning in " << (respawnTime / 1000) + 1 << "...";
 		textRenderer.render(camera.w / 2 - (hudText.str().length() * textRenderer.getFontW() / 2) + vX, camera.h / 2 - textRenderer.getFontH() + vY, hudText.str());
 	}
 }

@@ -48,6 +48,8 @@ class Player {
 	void doDamage(int damage) { health -= damage; }
 	void incrementScore() { score++; }
 
+	void switchWeapon(int wepNum);
+
 	private:
 	int playerNumber;
 
