@@ -1,13 +1,16 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "bullet.h"
 #include "common.h"
 #include "constants.h"
-#include "texture.h"
 #include "terrain.h"
 #include "text.h"
+#include "texture.h"
 
 class Terrain;
+class Weapon;
+class Bullet;
 
 class Player {
 	public:
@@ -25,9 +28,10 @@ class Player {
 	void inputRightStickY(const SDL_Event& e);
 	bool inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terrainUpdateList);
 	void inputLBDown(const SDL_Event& e);
+	void inputRightTrigger(const SDL_Event& e, vector<Bullet>& bulletVec);
 
-	void update(int deltaTime, const Terrain &T);
-	int checkCollision(const Terrain &T);
+	bool update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec);
+	int checkCollision(const Terrain& T);
 
 	void render(int camX, int camY, int vX, int vY, bool cross);
 	void renderHud(int camX, int camY, int vX, int vY);
@@ -39,6 +43,10 @@ class Player {
 
 	int getScore() const { return score; }
 	int getHealth() const { return health; }
+	bool getAlive() const { return alive; }
+
+	void doDamage(int damage) { health -= damage; }
+	void incrementScore() { score++; }
 
 	private:
 	int playerNumber;
@@ -68,7 +76,12 @@ class Player {
 	int dashTime;
 	bool dashAvail;
 	bool dig;
+	bool shoot;
 	bool alive;
+	int respawnTime;
+
+	vector<Weapon> weaponInv;
+	int currentWeapon = 0;
 
 	SDL_GameController* controllerPtr;
 
@@ -79,6 +92,7 @@ class Player {
 	TextureWrapper crossHair;
 	TextureWrapper circle;
 	TextureWrapper gun;
+	TextureWrapper calamari;
 	Text textRenderer;
 };
 

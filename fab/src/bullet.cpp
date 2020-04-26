@@ -5,63 +5,161 @@
 
 #include "bullet.h"
 
-Bullet::Bullet(double posx, double posy, double velx, double vely, double direction) {
+Bullet::Bullet(int pNum, int iPosX, int iPosY, int iVelx, int iVelY, string texturePath, int iDam, int iGrav, int iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer) {
+	playerNum = pNum;
+	posX = iPosX;
+	posY = iPosY;
+	velX = iVelx;
+	velY = iVelY;
+	damage = iDam;
+	gravity = iGrav;
+	accelX = iAX;
+	radius = iRad;
+	timerBullet = iTime;
+	lifetime = iLifetime;
+	bounciness = iBounce;
+	numBounces = iNumBounce;
+	impactPlayer = iPlayer;
 
+	if(!bulletTexture.loadFromFile(texturePath)) {
+		cout << "Failed to load bullet texture!" << endl;
+		width = 0;
+		height = 0;
+	} else {
+		width = bulletTexture.getWidth();
+		height = bulletTexture.getHeight();
+	}
 }
 
-Bullet::~Bullet() {
-	
+bool Bullet::update(int deltaTime, vector<int> &terrainUpdateList, Terrain& T, Player* (&players)[4], int numPlayers) {
+	int deltaX = 0;
+	velX = trunc(velX + accelX * deltaTime / 1000.0);
+	if(velX) {
+		deltaX = trunc((velX * deltaTime) / 1000.0);
+		posX += deltaX;
+	}
+
+	int deltaY = trunc(((velY * deltaTime) + .5 * gravity * (deltaTime * deltaTime) / 1000.0) / 1000.0);
+	posY += deltaY;
+	velY = velY + (gravity * deltaTime / 1000.0);
+
+	for(int i = 0; i < numPlayers; i++) {
+		if(i != playerNum - 1) {
+			if(posX + width >= players[i]->getX() && posX <= players[i]->getX() + players[i]->getW()) {
+				if(posY + height >= players[i]->getY() && posY <= players[i]->getY() + players[i]->getH()) {
+					if(players[i]->getAlive()) {
+						players[i]->doDamage(damage);
+						if(players[i]->getHealth() <= 0) {
+							players[playerNum-1]->incrementScore();
+						}
+						if(impactPlayer) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+	}
+	bool collidesWithTerrain = false;	
+	int centerX = (width / 2) + posX;
+	int centerY = (height / 2) + posY;
+	for(int y = -radius; y <= radius; y++) {
+		for(int x = -radius; x <= radius; x++) {
+			if(x * x + y * y < radius * radius) {
+				if(T.getValueAtXY(centerX + x, centerY + y) == 1) {
+					collidesWithTerrain = true;
+					break;
+				}
+			}
+		}
+		if(collidesWithTerrain) break;
+	}
+	if(collidesWithTerrain) {
+		for(int y = -radius; y <= radius; y++) {
+			for(int x = -radius; x <= radius; x++) {
+				if(x * x + y * y < radius * radius) {
+					if(T.setValueAtXY(centerX + x, centerY + y, 0)) {
+						terrainUpdateList.push_back((centerY + y) * LEVEL_WIDTH + (centerX + x));
+					}
+				}
+			}
+		}
+		if(numBounces == 0) {
+			return(true);
+		} else {
+			velX *= -bounciness;
+			velY *= -bounciness;
+			numBounces--;
+		}
+	}
+
+	return(false);
 }
 
-/*void Bullet::handleEvent(const SDL_Event& e) {
-	if(e.jaxis.value > 0) {
-		posX += 100;
-	}
-	if(e.jaxis.value < 0) {
-		posX -= 100;
-	}
-	if(posX - camera.x < camera.w / 3 && camera.x > 100) {
-		camera.x -= 100;
-	}
-	if(posX - camera.x > 2 * (camera.w / 3) && camera.x < (LEVEL_WIDTH - camera.w - 100)) {
-		camera.x += 100;
-	}
-	//Keep the player's position in bounds
-	if (posX > LEVEL_WIDTH) posX = LEVEL_WIDTH;
-	if (posY > LEVEL_HEIGHT) posY = LEVEL_HEIGHT;
-	if (posX < 0) posX = 0;
-	if (posY < 0) posY = 0;
-}*/
-
-/* randomBullet creates a bullet with random properties, then returns the new bullet.
- * Certain bullet properties are instead calculated by other properties.
- * For instance, a bullet with "impactGround = false" might deal less damage
- * than its non-bouncy counterparts, but may also have increased lifetime.
-Bullet Bullet::randomBullet(){
-	Bullet newBullet;
-	//Generate random properties
-	//TODO: give random properties to all variables under this subsection
-	newBullet.impactGround = rand() % 2;
-	newBullet.impactPlayer = rand() % 2;
-	newBullet.ammoDepletion = rand() % (MAX_AMMODEPLETION-MIN_AMMODEPLETION) + MIN_AMMODEPLETION;
-	newBullet.reloadTime = rand() % (MAX_RELOADTIME-MIN_RELOADTIME) + MIN_RELOADTIME;
-	newBullet.shotCount = rand() % (MAX_SHOTCOUNT-MIN_SHOTCOUNT) + MIN_SHOTCOUNT;
-	newBullet.shotDelay = rand() % MAX_SHOTDELAY + 1;
-	newBullet.bounciness = rand() % (MAX_BOUNCINESS-MIN_BOUNCINESS) + MIN_BOUNCINESS;
-	newBullet.acceleration = rand() % (MAX_ACCELERATION-MIN_ACCELERATION) + MIN_ACCELERATION;
-	//newBullet.lifetime = rand() % (MAX_LIFETIME-MIN_LIFETIME) + MIN_LIFETIME;
-	newBullet.lifetime = 200;
-	newBullet.gravity = rand() % (MAX_GRAVITY-MIN_GRAVITY) + MIN_GRAVITY;
-	
-	
-	//Calculate remaining properties TODO adjust bonuses to speed/damage as needed
-	newBullet.speed = 5.0 + impactGround(1.0) + impactPlayer(1.0) + (shotDelay/10) + ((1-shotCount)/2.0);
-	newBullet.damage = 10.0 + ((1.0-acceleration)*20.0) + (reloadTime/10.0) + (ammoDepletion/5.0) + ((200-lifetime)/10.0);
-	newBullet.size = damage/30;
-	newBullet.size = min(max(MIN_SIZE,newBullet.size),MAX_SIZE);
-	return newBullet;
+void Bullet::render(int camX, int camY, int vX, int vY) {
+	SDL_Point bulletCenter;
+	bulletCenter.x = width / 2;
+	bulletCenter.y = height / 2;
+	bulletTexture.render((posX - camX) + vX, (posY - camY) + vY, NULL, getDegrees(velX, velY), &bulletCenter);
 }
 
-/*void Bullet::render(int camX, int camY, int vX, int vY) {
-	playerTexture.render((posX - camX) + vX, (posY - camY) + vY);
-}*/
+void Bullet::reverseVel(int pNum) {
+	playerNum = pNum;
+	velX = -velX;
+	velY = -velY;
+}
+
+Weapon::Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, int iDam, int iGrav, int iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer) {
+	weaponName = name;
+	totalAmmo = iAmmo;
+	ammo = iAmmo;
+	reloadTime = iReloadTime;
+	shotTime = iShotTime;
+	damage = iDam;
+	gravity = iGrav;
+	accelX = iAX;
+	radius = iRad;
+	timerBullet = iTime;
+	lifetime = iLifetime;
+	bounciness = iBounce;
+	numBounces = iNumBounce;
+	impactPlayer = iPlayer;
+	fireVel = iVel;
+	bulletTexturePath = iBTexture;
+
+	currentReloadTime = reloadTime;
+	currentShotTime = shotTime;
+}
+
+void Weapon::shoot(vector<Bullet>& bulletVec, int playerNum, int angle, int pCenterX, int pCenterY) {
+	if(currentShotTime == shotTime && ammo) {
+		int velX = getXComp(angle, fireVel);
+		int velY = getYComp(angle, fireVel);
+		int posX = getXComp(angle, 30) + pCenterX;
+		int posY = getYComp(angle, 30) + pCenterY;
+		bulletVec.emplace_back(playerNum, posX, posY, velX, velY, bulletTexturePath, damage, gravity, accelX, radius, timerBullet, lifetime, bounciness, numBounces, impactPlayer);
+		currentShotTime -= 1;
+		ammo--;
+	}
+}
+
+void Weapon::update(int deltaTime) {
+	if(!ammo) currentReloadTime -= deltaTime;
+	if(currentShotTime < shotTime) currentShotTime -= deltaTime;
+
+	if(currentReloadTime < 0) {
+		ammo = totalAmmo;
+		currentReloadTime = reloadTime;
+	}
+
+	if(currentShotTime < 0) {
+		currentShotTime = shotTime;
+	}
+}
+
+bool Weapon::isReloading() {
+	if(!ammo) {
+		return true;
+	}
+	return false;
+}

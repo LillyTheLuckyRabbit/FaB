@@ -194,14 +194,18 @@ int Terrain::getValueAtXY(int x, int y) const {
 	}
 }
 
-void Terrain::setValueAtIndex(int index, int value) {
+bool Terrain::setValueAtIndex(int index, int value) {
 	if(index < l.size()) {
 		l[index] = value;
+		return true;
 	}
+	return false;
 }
 
-void Terrain::setValueAtXY(int x, int y, int value) {
+bool Terrain::setValueAtXY(int x, int y, int value) {
 	if(y * levWidth + x < l.size()) {
 		l[y * levWidth + x] = value;
+		return true;
 	}
+	return false;
 }

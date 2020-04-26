@@ -79,16 +79,23 @@ Player::Player(int num, int scoreToWin) {
 	crossHair.setAlpha(128);
 
 	textRenderer.loadFont("sprites/font.png", 17, 16);
-	
+	calamari.loadFromFile("sprites/calamari.png");
+
 	health = 100;
 	score = 0;
 	goal = scoreToWin;
+	respawnTime = 10000;
 
 	grounded = false;
 	dashAvail = true;
 	dashTime = 0;
 	dig = true;
+	shoot = true;
 	alive = true;
+
+	for(int i = 0; i < 4; i++) {
+		weaponInv.emplace_back("Peashooter", 4, 500, 50, 2000, "sprites/bullet.png", 20);
+	}
 }
 
 Player::Player() {
@@ -103,10 +110,14 @@ Player::~Player() {
 }
 
 void Player::inputLeftStick(const SDL_Event& e) {
-	if(e.caxis.value > 2000) {
-		accelDir = 1;
-	} else if(e.caxis.value < -2000) {
-		accelDir = -1;
+	if(alive) {
+		if(e.caxis.value > 2000) {
+			accelDir = 1;
+		} else if(e.caxis.value < -2000) {
+			accelDir = -1;
+		} else {
+			accelDir = 0;
+		}
 	} else {
 		accelDir = 0;
 	}
@@ -125,50 +136,67 @@ void Player::inputRightStickY(const SDL_Event& e) {
 }
 
 bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terrainUpdateList) {
-	bool containsTerrain = false;
-	if(e.caxis.value > 2500) {
-		if(dig) {
-			int centerX = (width / 2 + getXComp(angle, 20)) + posX;
-			int centerY = (height / 2 + getYComp(angle, 20)) + posY;
-			int radius = 20;
-			for(int y = -radius; y <= radius; y++) {
-				for(int x = -radius; x <= radius; x++) {
-					if(x * x + y * y < radius * radius) {
-						if(T.getValueAtXY(centerX + x, centerY + y) == 1) {
-							containsTerrain = true;
-							break;
-						}
-					}
-				}
-				if(containsTerrain) break;
-			}
-			if(containsTerrain) {
+	if(alive) {
+		bool containsTerrain = false;
+		if(e.caxis.value > 2500) {
+			if(dig) {
+				int radius = 20;
+				int centerX = (width / 2 + getXComp(angle, radius)) + posX;
+				int centerY = (height / 2 + getYComp(angle, radius)) + posY;
 				for(int y = -radius; y <= radius; y++) {
 					for(int x = -radius; x <= radius; x++) {
 						if(x * x + y * y < radius * radius) {
 							if(T.getValueAtXY(centerX + x, centerY + y) == 1) {
-								T.setValueAtXY(centerX + x, centerY + y, 0);
-								terrainUpdateList.push_back((centerY + y) * LEVEL_WIDTH + (centerX + x));
+								containsTerrain = true;
+								break;
 							}
 						}
 					}
+					if(containsTerrain) break;
 				}
-				dig = false;
+				if(containsTerrain) {
+					for(int y = -radius; y <= radius; y++) {
+						for(int x = -radius; x <= radius; x++) {
+							if(x * x + y * y < radius * radius) {
+								if(T.setValueAtXY(centerX + x, centerY + y, 0)) {
+									terrainUpdateList.push_back((centerY + y) * LEVEL_WIDTH + (centerX + x));
+								}
+							}
+						}
+					}
+					dig = false;
+				}
 			}
+		} else if(e.caxis.value == 0) {
+			dig = true;
 		}
-	} else if(e.caxis.value == 0) {
-		dig = true;
+		return (containsTerrain);
 	}
-	return (containsTerrain);
+	return (false);
+}
+
+void Player::inputRightTrigger(const SDL_Event& e, vector<Bullet>& bulletVec) {
+	if(alive) {
+		if(e.caxis.value > 2500) {
+			if(shoot) {
+				weaponInv[currentWeapon].shoot(bulletVec, playerNumber, angle, posX + width / 2, posY + height / 2);
+				shoot = false;
+			}
+		} else if(e.caxis.value == 0) {
+			shoot = true;
+		}
+	}
 }
 
 void Player::inputRBDown(const SDL_Event& e) {
-	if(e.cbutton.state == SDL_PRESSED) {
-		if(grounded) {
-			velY = -500;
-			posY -= 1;
-			gravity = PLAYER_LOWGRAV;
-			grounded = false;
+	if(alive) {
+		if(e.cbutton.state == SDL_PRESSED) {
+			if(grounded) {
+				velY = -500;
+				posY -= 1;
+				gravity = PLAYER_LOWGRAV;
+				grounded = false;
+			}
 		}
 	}
 }
@@ -180,19 +208,21 @@ void Player::inputRBUp(const SDL_Event& e) {
 }
 
 void Player::inputLBDown(const SDL_Event& e) {
-	if(e.cbutton.state == SDL_PRESSED) {
-		if(dashAvail) {
-			velY = getYComp(angle, 1000);
-			velX = getXComp(angle, 1000);
-			gravity = PLAYER_HIGHGRAV;
-			grounded = false;
-			dashAvail = false;
-			dashTime = 1000;
+	if(alive) {
+		if(e.cbutton.state == SDL_PRESSED) {
+			if(dashAvail) {
+				velY = getYComp(angle, 1000);
+				velX = getXComp(angle, 1000);
+				gravity = PLAYER_HIGHGRAV;
+				grounded = false;
+				dashAvail = false;
+				dashTime = 1000;
+			}
 		}
 	}
 }
 
-void Player::update(int deltaTime, const Terrain& T) {
+bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) {
 	if(posX - camera.x < camera.w / 6 && camera.x > 0) {
 		camera.x -= 2;
 		if(posX - width < camera.x) {
@@ -281,6 +311,40 @@ void Player::update(int deltaTime, const Terrain& T) {
 			}
 		}
 	}
+
+	weaponInv[currentWeapon].update(deltaTime);
+
+	if(health <= 0) {
+		health = 0;
+		alive = false;
+	}
+
+	if(!alive) {
+		respawnTime -= deltaTime;
+	}
+
+	if(respawnTime < 0) {
+		alive = true;
+		health = 100;
+		respawnTime = 10000;
+		posX = rand() % (LEVEL_WIDTH - width);
+		posY = rand() % (LEVEL_HEIGHT - height);
+	}
+
+	if(dashTime > 0) {
+		int centerX = posX + width / 2;
+		int centerY = posY + height / 2;
+		int radius = circle.getWidth() / 2;
+		for(auto i = bulletVec.begin(); i != bulletVec.end(); i++) {
+			if(i->getX() + i->getH() >= centerX - radius && i->getX() <= centerX + radius) {
+				if(i->getY() + i->getH() >= centerY - radius && i->getY() <= centerY + radius) {	
+					i->reverseVel(playerNumber);
+				}
+			}
+		}
+	}
+
+	return (score == goal);
 }
 
 int Player::checkCollision(const Terrain& T) {
@@ -304,49 +368,74 @@ void Player::render(int camX, int camY, int vX, int vY, bool cross) {
 	} else {
 		flip = SDL_FLIP_NONE;
 	}
-	SDL_RendererFlip gunFlip;
-	if((angle >= -90 && angle <= 0) || (angle <= 90 && angle >= 0)) {
-		gunFlip = SDL_FLIP_HORIZONTAL;
-	} else {
-		gunFlip = (SDL_RendererFlip)(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL);
-	}
-	int gunX = 2;
-	int gunY = 18;
-	SDL_Point gunPivot;
-	gunPivot.x = 2;
-	gunPivot.y = 4;
-	if(flip == SDL_FLIP_HORIZONTAL) {
-		gunX = 24;
-		gunY = 9;
+	if(alive) {
+		SDL_RendererFlip gunFlip;
+		if((angle >= -90 && angle <= 0) || (angle <= 90 && angle >= 0)) {
+			gunFlip = SDL_FLIP_HORIZONTAL;
+		} else {
+			gunFlip = (SDL_RendererFlip)(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL);
+		}
+		int gunX = 2;
+		int gunY = 18;
+		SDL_Point gunPivot;
 		gunPivot.x = 2;
-		gunPivot.y = 11;
+		gunPivot.y = 4;
+		if(flip == SDL_FLIP_HORIZONTAL) {
+			gunX = 24;
+			gunY = 9;
+			gunPivot.x = 2;
+			gunPivot.y = 11;
+		}
+		gun.render((posX - camX) + vX + gunX, (posY - camY) + vY + gunY, NULL, angle, &gunPivot, gunFlip);
+		playerTexture.render((posX - camX) + vX, (posY - camY) + vY, NULL, 0, NULL, flip);
+		int eyeX = 10;
+		if(flip == SDL_FLIP_HORIZONTAL) eyeX = 11;
+		SDL_Point eyeCenter;
+		eyeCenter.x = 4;
+		eyeCenter.y = 4;
+		eyeTexture.render(posX - camX + eyeX + vX, posY - camY + 10 + vY, NULL, angle, &eyeCenter, SDL_FLIP_HORIZONTAL);
+		if(cross) {
+			SDL_Point playerCenter;
+			playerCenter.x = -100;
+			playerCenter.y = 0;
+			crossHair.render(posX - camX + vX + 100, posY - camY + vY + height / 2, NULL, angle, &playerCenter);
+		}
+		if(dashTime > 0) circle.render(posX - camX + vX - (circle.getWidth() / 2 - width / 2), posY - camY + vY - (circle.getHeight() / 2 - height / 2));
+	} else {
+		calamari.render((posX - camX) + vX, (posY - camY) + vY, NULL, 0, NULL, flip);
 	}
-	gun.render((posX - camX) + vX + gunX, (posY - camY) + vY + gunY, NULL, angle, &gunPivot, gunFlip);
-	playerTexture.render((posX - camX) + vX, (posY - camY) + vY, NULL, 0, NULL, flip);
-	int eyeX = 10;
-	if(flip == SDL_FLIP_HORIZONTAL) eyeX = 11;
-	SDL_Point eyeCenter;
-	eyeCenter.x = 4;
-	eyeCenter.y = 4;
-	eyeTexture.render(posX - camX + eyeX + vX, posY - camY + 10 + vY, NULL, angle, &eyeCenter, SDL_FLIP_HORIZONTAL);
-	if(cross) {
-		SDL_Point playerCenter;
-		playerCenter.x = -100;
-		playerCenter.y = 0;
-		crossHair.render(posX - camX + vX + 100, posY - camY + vY + height / 2, NULL, angle, &playerCenter);
-	}
-	if(dashTime > 0) circle.render(posX - camX + vX - (circle.getWidth() / 2 - width / 2), posY - camY + vY - (circle.getHeight() / 2 - height / 2));
 }
 
 void Player::renderHud(int camX, int camY, int vX, int vY) {
 	stringstream hudText;
+
 	hudText.str("");
 	hudText << "Health: " << health;
 	textRenderer.render(textRenderer.getFontW() + vX, camera.h - textRenderer.getFontH() - 4 + vY, hudText.str());
+
+	if(weaponInv[currentWeapon].isReloading()) {
+		hudText.str("");
+		hudText << "Reloading...";
+		textRenderer.render(textRenderer.getFontW() + vX, camera.h - 2 * textRenderer.getFontH() - 4 + vY, hudText.str());
+	} else {
+		hudText.str("");
+		hudText << "Ammo: " << weaponInv[currentWeapon].getAmmo() << "/" << weaponInv[currentWeapon].getTotal();
+		textRenderer.render(textRenderer.getFontW() + vX, camera.h - 2 * textRenderer.getFontH() - 4 + vY, hudText.str());
+	}
+
+	hudText.str("");
+	hudText << weaponInv[currentWeapon].getName();
+	textRenderer.render(textRenderer.getFontW() + vX, camera.h - 3 * textRenderer.getFontH() - 4 + vY, hudText.str());
+
 	hudText.str("");
 	hudText << "Score: " << score << "/" << goal;
 	textRenderer.render(camera.w - ((hudText.str().length() + 1) * textRenderer.getFontW()) + vX, camera.h - textRenderer.getFontH() - 4 + vY, hudText.str());
 
+	if(!alive) {
+		hudText.str("");
+		hudText << "Repawning in " << respawnTime / 1000 << "...";
+		textRenderer.render(camera.w / 2 - (hudText.str().length() * textRenderer.getFontW() / 2) + vX, camera.h / 2 - textRenderer.getFontH() + vY, hudText.str());
+	}
 }
 
 void Player::halveCameraHeight() {

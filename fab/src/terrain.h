@@ -60,8 +60,8 @@ class Terrain {
 	void printLevel();
 	int getValueAtIndex(int index) const;
 	int getValueAtXY(int x, int y) const;
-	void setValueAtIndex(int index, int value);
-	void setValueAtXY(int x, int y, int value);
+	bool setValueAtIndex(int index, int value);
+	bool setValueAtXY(int x, int y, int value);
 
 	private:
 	vector<int> l;  //level
