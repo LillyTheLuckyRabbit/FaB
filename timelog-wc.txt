@@ -49,3 +49,8 @@
 2020-04-21
 19:30 - 22:45 - Added dash graphic, fixed crash from editing OOB portion of mask texture,
 		added glock
+
+2020-04-25
+14:30 - 16:00 - Moved HUD rendering code into 'Player' class, improved dash bubble texture
+19:45 - 23:30 - Added death, respawning, a weapon, reflecting using the dash, and a
+		win condition.
