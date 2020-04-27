@@ -31,6 +31,6 @@ There are four weapons in the game:
 2. **Flamethrower**
   - The Flamethrower's range is abysmal, but up close, it can wipe out a player with full health in a split second.
 3. **Shotgun**
-  - The Shotgun has slightly better range than the Flamethrower and the cost of spread and worse damage.
+  - The Shotgun has slightly better range than the Flamethrower at the cost of spread and worse damage.
 4. **Grenade Launcher**
   - The Grenade Launcher can destroy large chunks of terrain and players with its high blast radius. The downside is, the grenade has an arcing path by virtue of being heavy.
