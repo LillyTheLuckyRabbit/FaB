@@ -1,3 +1,9 @@
+/* File: bullet.cpp
+ * Authors: David Butler and William Coar
+ * Description: This class contains the variables/functions used to create and move bullets.
+ * Additionally, this file contains the weapons class, which handles reloading, shot delay, and passing variables to bullet.
+*/
+
 #ifndef BULLET_H
 #define BULLET_H
 

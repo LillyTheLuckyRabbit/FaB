@@ -8,6 +8,7 @@
 
 #include "angle.h"
 
+//Player constructor
 Player::Player(int num, int scoreToWin) {
 	playerNumber = num;
 	controllerPtr = SDL_GameControllerOpen(playerNumber - 1);
@@ -41,6 +42,7 @@ Player::Player(int num, int scoreToWin) {
 
 	gravity = PLAYER_HIGHGRAV;
 
+	//Sprite loader
 	if(!playerTexture.loadFromFile("sprites/player_squid.png")) {
 		cout << "Failed to load the player sprite!" << endl;
 	}
@@ -57,6 +59,7 @@ Player::Player(int num, int scoreToWin) {
 		cout << "Failed to load the gun sprite!" << endl;
 	}
 
+	//Color modifier for different players
 	if(playerNumber == 1) {
 		playerTexture.setColor(64, 200, 64);
 		crossHair.setColor(64, 200, 64);
@@ -92,7 +95,8 @@ Player::Player(int num, int scoreToWin) {
 	dig = true;
 	shoot = false;
 	alive = true;
-
+	
+	//Sound loader
 	jumpSnd = Mix_LoadWAV("sound/jump.wav");
 	if(jumpSnd == NULL) {
 		cout << "Failed to load jump sound." << endl;
@@ -129,13 +133,16 @@ Player::Player(int num, int scoreToWin) {
 
 	//	Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, double iDam, int iGrav = 0, double iAX = 0, int iRad = 4, bool iTime = false, int iLifetime = 0, double iBounce = 1.0, int iNumBounce = 0, bool iPlayer = true, int spread = 0);
 
+	//Player's weapon inventory (Max of 4)
 	weaponInv.emplace_back("Six shooter", 6, 1000, 300, 1800, "sprites/bullet.png", 20, 0, 1.0, 5);
 	weaponInv.emplace_back("Flamethrower", 50, 1250, 10, 450, "sprites/fire.png", 2, -200, 0.97, 2, true, 75, 0.1, -1);
-	weaponInv.emplace_back("Shotgun", 12, 1400, 0, 1000, "sprites/bullet.png", 7, 0, 0.98, 3, true, 60, 0.76, 1, true, 20, 5);
+	weaponInv.emplace_back("Shotgun", 8, 1400, 0, 1000, "sprites/bullet.png", 7, 0, 0.995, 3, true, 60, 0.76, 1, true, 20, 5);
+	weaponInv.emplace_back("Grenade Launcher", 3, 2000, 700, 700, "sprites/bomb.png", 30, 500, 0.985, 10, false, 10000, 0.3, 5);
 	//weaponInv.emplace_back("Mine", 2, 2000, 400, 600, "sprites/bomb.png", 2, 500, 0.95, 10, true, 10000, 0.3, -1);
-	weaponInv.emplace_back("Leighzuurg", 3, 1500, 50, 700, "sprites/laser.png", 10, 0, 1.0, 5, false, 0, 1.0, 3);
+	//weaponInv.emplace_back("Leighzuurg", 3, 1500, 50, 700, "sprites/laser.png", 10, 0, 1.0, 5, false, 0, 1.0, 3);
 }
 
+//Default constructor
 Player::Player() {
 	controllerPtr = NULL;
 }
@@ -147,6 +154,7 @@ Player::~Player() {
 	}
 }
 
+//Moving left/right
 void Player::inputLeftStick(const SDL_Event& e) {
 	if(alive) {
 		if(e.caxis.value > 2000) {
@@ -161,18 +169,22 @@ void Player::inputLeftStick(const SDL_Event& e) {
 	}
 }
 
+//Aiming the cursor X
 void Player::inputRightStickX(const SDL_Event& e) {
 	if(e.caxis.value > 500 || e.caxis.value < -500) {
 		angleX = e.caxis.value;
 	}
 }
 
+//Aiming the cursor Y
 void Player::inputRightStickY(const SDL_Event& e) {
 	if(e.caxis.value > 500 || e.caxis.value < -500) {
 		angleY = e.caxis.value;
 	}
 }
 
+//Player dig function
+//Deletes dirt in a circle in the direction the player was looking, and modifies the terrain to be updated.
 bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terrainUpdateList) {
 	if(alive) {
 		bool containsTerrain = false;
@@ -214,6 +226,9 @@ bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terra
 	return (false);
 }
 
+//Shoot button
+//Turns the shooting on/off depending on if the player is holding the right trigger down.
+//The actual shoot function is then done in player update.
 void Player::inputRightTrigger(const SDL_Event& e, vector<Bullet>& bulletVec) {
 	if(alive) {
 		if(e.caxis.value > 2500) {
@@ -225,27 +240,7 @@ void Player::inputRightTrigger(const SDL_Event& e, vector<Bullet>& bulletVec) {
 	}
 }
 
-
-void Player::inputRBDown(const SDL_Event& e) {
-	if(alive) {
-		if(e.cbutton.state == SDL_PRESSED) {
-			if(grounded) {
-				velY = -500;
-				posY -= 1;
-				gravity = PLAYER_LOWGRAV;
-				grounded = false;
-				Mix_PlayChannel(-1, jumpSnd, 0);
-			}
-		}
-	}
-}
-
-void Player::inputRBUp(const SDL_Event& e) {
-	if(e.cbutton.state == SDL_RELEASED) {
-		gravity = PLAYER_HIGHGRAV;
-	}
-}
-
+//Player dash
 void Player::inputLBDown(const SDL_Event& e) {
 	if(alive) {
 		if(e.cbutton.state == SDL_PRESSED) {
@@ -262,13 +257,40 @@ void Player::inputLBDown(const SDL_Event& e) {
 	}
 }
 
+//Player jump. The player receives low gravity until they release the jump button (inputRBUp).
+//This lets the player either tap the jump button to do shorter hops,
+//Or hold it for higher jumps.
+void Player::inputRBDown(const SDL_Event& e) {
+	if(alive) {
+		if(e.cbutton.state == SDL_PRESSED) {
+			if(grounded) {
+				velY = -500;
+				posY -= 1;
+				gravity = PLAYER_LOWGRAV;
+				grounded = false;
+				Mix_PlayChannel(-1, jumpSnd, 0);
+			}
+		}
+	}
+}
+
+//See inputRBDown function above
+void Player::inputRBUp(const SDL_Event& e) {
+	if(e.cbutton.state == SDL_RELEASED) {
+		gravity = PLAYER_HIGHGRAV;
+	}
+}
+
+//Swap the player's current weapon
 void Player::switchWeapon(int wepNum) {
 	if(wepNum < 4 && wepNum >= 0) {
 		currentWeapon = wepNum;
 	} 
 }
 
+//Update player function
 bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) {
+	//Adjust camera
 	if(posX - camera.x < camera.w / 6 && camera.x > 0) {
 		camera.x -= 2;
 		if(posX - width < camera.x) {
@@ -293,12 +315,16 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 			camera.y += 5;
 		}
 	}
+	
+	//Decrement the dash invulnerability if the player just used it
 	if(!dashAvail && dashTime > 0) {
 		dashTime -= deltaTime;
 	}
 
+	//Update where the player is aiming
 	angle = getDegrees(angleX, angleY);
 
+	//Update player accelerations
 	if(accelDir == 0) {
 		if(velX > 0 && grounded) {
 			accelX = -2000;
@@ -325,6 +351,7 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 		}
 	}
 
+	//Update player's X position
 	int deltaX = 0;
 	velX = trunc(velX + accelX * deltaTime / 1000.0);
 	if(velX) {
@@ -332,11 +359,13 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 		posX += deltaX;
 	}
 
+	//Update player's Y position
 	int deltaY = trunc(((velY * deltaTime) + .5 * gravity * (deltaTime * deltaTime) / 1000.0) / 1000.0);
 	posY += deltaY;
 	if(velY >= 0) gravity = PLAYER_HIGHGRAV;
 	velY = velY + (gravity * deltaTime / 1000.0);
 
+	//Check if player is touching something
 	if(checkCollision(T)) {
 		if(deltaY > 0) grounded = true;
 		if(dashTime <= 0 && !dashAvail) {
@@ -361,6 +390,7 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 		}
 	}
 
+	//Play/pause the walk loop sound depending on whether or not the player is moving left/right on the gorund.
 	if(grounded) {
 		if(deltaX) {
 			if(Mix_Paused(walkLoopChnl)) {
@@ -379,16 +409,19 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 
 	weaponInv[currentWeapon].update(deltaTime);
 
+	//Kill players that have no health left
 	if(health <= 0 && alive) {
 		health = 0;
 		alive = false;
 		Mix_PlayChannel(-1, deadSnd, 0);
 	}
 
+	//Decrement respawn timer for dead players
 	if(!alive) {
 		respawnTime -= deltaTime;
 	}
 
+	//Revive players and place them in a random area of the level.
 	if(respawnTime < 0) {
 		alive = true;
 		health = 100;
@@ -399,6 +432,7 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 		Mix_PlayChannel(-1, respawnSnd, 0);
 	}
 
+	//Give the player a reflective bubble if they are currently performing a dash.
 	if(dashTime > 0) {
 		int centerX = posX + width / 2;
 		int centerY = posY + height / 2;
@@ -413,9 +447,10 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 		}
 	}
 	
+	//Create bullets if the player is trying to shoot
 	if(alive){
 		if(shoot) {
-				shooting multiple bullets in one tick seems to be buggy atm
+				//shooting multiple bullets in one tick seems to be buggy atm
 				//for (int i = 0; i < weaponInv[currentWeapon].getCount(); i++){
 					//Adjust spread for low accuracy weapons
 					int bulletSpread = weaponInv[currentWeapon].getSpread();
@@ -431,6 +466,7 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 	return (score == goal);
 }
 
+//Check the direction of the terrain/level border that the player is colliding with
 int Player::checkCollision(const Terrain& T) {
 	if(posX < 0 || posX > LEVEL_WIDTH - width || posY < 0 || posY > LEVEL_HEIGHT - height) {
 		return (height);
@@ -445,6 +481,7 @@ int Player::checkCollision(const Terrain& T) {
 	return (0);
 }
 
+//Render the player, the player's eye, and their gun
 void Player::render(int camX, int camY, int vX, int vY, bool cross) {
 	SDL_RendererFlip flip;
 	if((angle >= -90 && angle <= 0) || (angle <= 90 && angle >= 0)) {
@@ -490,6 +527,7 @@ void Player::render(int camX, int camY, int vX, int vY, bool cross) {
 	}
 }
 
+//Render the player's UI (ammo, health, respawn timer and score).
 void Player::renderHud(int camX, int camY, int vX, int vY) {
 	stringstream hudText;
 
@@ -522,6 +560,7 @@ void Player::renderHud(int camX, int camY, int vX, int vY) {
 	}
 }
 
+//Modify camera position for when 3 or 4 player splitscreen is needed.
 void Player::halveCameraHeight() {
 	camera.h = RENDER_HEIGHT / 2;
 	camera.y = posY + RENDER_HEIGHT / 8;

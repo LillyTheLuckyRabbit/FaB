@@ -1,10 +1,12 @@
 /* File: bullet.cpp
  * Authors: David Butler and William Coar
  * Description: This class contains the variables/functions used to create and move bullets.
+ * Additionally, this file contains the weapons class, which handles reloading, shot delay, and passing variables to bullet.
 */
 
 #include "bullet.h"
 
+//Copy constructor
 Bullet::Bullet(int pNum, int iPosX, int iPosY, int iVelx, int iVelY, string texturePath, int iDam, int iGrav, double iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer) {
 	playerNum = pNum;
 	posX = iPosX;
@@ -31,6 +33,7 @@ Bullet::Bullet(int pNum, int iPosX, int iPosY, int iVelx, int iVelY, string text
 	}
 }
 
+//Bullet update function. When returning true, the bullet has hit something and is deleted.
 bool Bullet::update(int deltaTime, vector<int> &terrainUpdateList, Terrain& T, Player* (&players)[4], int numPlayers) {
 	int deltaX = 0;
 	velX = trunc(velX + deltaTime / 1000.0);
@@ -112,12 +115,14 @@ void Bullet::render(int camX, int camY, int vX, int vY) {
 	bulletTexture.render((posX - camX) + vX, (posY - camY) + vY, NULL, getDegrees(velX, velY), &bulletCenter);
 }
 
+//Reverses the bullet's direction of velocity (such as when the bullet gets reflected)
 void Bullet::reverseVel(int pNum) {
 	playerNum = pNum;
 	velX = -velX;
 	velY = -velY;
 }
 
+//Copy constructor
 Weapon::Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, int iDam, int iGrav, double iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer, int iSpread, int iCount) {
 	weaponName = name;
 	totalAmmo = iAmmo;
@@ -156,6 +161,7 @@ void Weapon::shoot(vector<Bullet>& bulletVec, int playerNum, int angle, int pCen
 	}
 }
 
+//Weapon update function. Also handles reloading and shot delay.
 void Weapon::update(int deltaTime) {
 	if(!ammo) currentReloadTime -= deltaTime;
 	if(currentShotTime < shotTime) currentShotTime -= deltaTime;
