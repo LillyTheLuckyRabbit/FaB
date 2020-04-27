@@ -118,7 +118,7 @@ void Bullet::reverseVel(int pNum) {
 	velY = -velY;
 }
 
-Weapon::Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, int iDam, int iGrav, double iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer) {
+Weapon::Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, int iDam, int iGrav, double iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer, int iSpread, int iCount) {
 	weaponName = name;
 	totalAmmo = iAmmo;
 	ammo = iAmmo;
@@ -135,9 +135,13 @@ Weapon::Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel,
 	impactPlayer = iPlayer;
 	fireVel = iVel;
 	bulletTexturePath = iBTexture;
+	spread = iSpread;
+	count = iCount;
+	//carly = iCarly; B)
 
 	currentReloadTime = reloadTime;
 	currentShotTime = shotTime;
+	
 }
 
 void Weapon::shoot(vector<Bullet>& bulletVec, int playerNum, int angle, int pCenterX, int pCenterY) {

@@ -47,13 +47,15 @@ class Bullet {
 
 class Weapon {
 	public:
-	Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, int iDam, int iGrav = 0, double iAX = 0, int iRad = 4, bool iTime = false, int iLifetime = 0, double iBounce = 1.0, int iNumBounce = 0, bool iPlayer = true);
+	Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, int iDam, int iGrav = 0, double iAX = 0, int iRad = 4, bool iTime = false, int iLifetime = 0, double iBounce = 1.0, int iNumBounce = 0, bool iPlayer = true, int spread = 0, int count = 1);
 	int getAmmo() { return ammo; }
 	int getTotal() { return totalAmmo; }
 	void shoot(vector<Bullet>& bulletVec, int playerNum, int angle, int pCenterX, int pCenterY);
 	void update(int deltaTime);
 	bool isReloading();
-	string getName() const { return weaponName; }
+	string getName() const { return weaponName; };
+	int getSpread() const { return spread;};
+	int getCount() const { return count;};
 
 	private:
 	string weaponName;
@@ -77,6 +79,8 @@ class Weapon {
 	double bounciness;  //Amount of speed bullet retains upon hitting walls
 	int numBounces;     //Number of bounces off of terrain before detroyed (-1 = infinite)
 	bool impactPlayer;  //If false, bullets aren't destroyed upon impacting the player
+	int spread;			//Random bullet spread in degrees (0 = no spread)
+	int count;			//How many bullets are shot at once
 };
 
 #endif

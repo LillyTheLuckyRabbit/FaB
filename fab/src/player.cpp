@@ -127,12 +127,13 @@ Player::Player(int num, int scoreToWin) {
 	}
 	Mix_Pause(walkLoopChnl);
 
-	//	Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, double iDam, int iGrav = 0, double iAX = 0, int iRad = 4, bool iTime = false, int iLifetime = 0, double iBounce = 1.0, int iNumBounce = 0, bool iPlayer = true);
+	//	Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, double iDam, int iGrav = 0, double iAX = 0, int iRad = 4, bool iTime = false, int iLifetime = 0, double iBounce = 1.0, int iNumBounce = 0, bool iPlayer = true, int spread = 0);
 
 	weaponInv.emplace_back("Six shooter", 6, 1000, 300, 1800, "sprites/bullet.png", 20, 0, 1.0, 5);
 	weaponInv.emplace_back("Flamethrower", 50, 1250, 10, 450, "sprites/fire.png", 2, -200, 0.97, 2, true, 75, 0.1, -1);
-	weaponInv.emplace_back("Mine", 2, 2000, 400, 600, "sprites/bomb.png", 2, 500, 0.95, 10, true, 10000, 0.3, -1);
-	weaponInv.emplace_back("Leighzuurg", 2, 500, 50, 1000, "sprites/laser.png", 20, 0, 1.0, 10, false, 0, 1.0, 3);
+	weaponInv.emplace_back("Shotgun", 12, 1400, 0, 1000, "sprites/bullet.png", 7, 0, 0.98, 3, true, 60, 0.76, 1, true, 20, 5);
+	//weaponInv.emplace_back("Mine", 2, 2000, 400, 600, "sprites/bomb.png", 2, 500, 0.95, 10, true, 10000, 0.3, -1);
+	weaponInv.emplace_back("Leighzuurg", 3, 1500, 50, 700, "sprites/laser.png", 10, 0, 1.0, 5, false, 0, 1.0, 3);
 }
 
 Player::Player() {
@@ -392,6 +393,7 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 		alive = true;
 		health = 100;
 		respawnTime = 10000;
+		shoot = false;
 		posX = rand() % (LEVEL_WIDTH - width);
 		posY = rand() % (LEVEL_HEIGHT - height);
 		Mix_PlayChannel(-1, respawnSnd, 0);
@@ -413,7 +415,16 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 	
 	if(alive){
 		if(shoot) {
-				weaponInv[currentWeapon].shoot(bulletVec, playerNumber, angle, posX + width / 2, posY + height / 2);
+				shooting multiple bullets in one tick seems to be buggy atm
+				//for (int i = 0; i < weaponInv[currentWeapon].getCount(); i++){
+					//Adjust spread for low accuracy weapons
+					int bulletSpread = weaponInv[currentWeapon].getSpread();
+					if (bulletSpread){
+						angle += trunc((rand() % bulletSpread)-(bulletSpread/2));
+						angle %= 360;
+					}
+					weaponInv[currentWeapon].shoot(bulletVec, playerNumber, angle, posX + width / 2, posY + height / 2);
+				//}
 		}
 	}
 
