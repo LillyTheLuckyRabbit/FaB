@@ -26,11 +26,11 @@ PRO TIP: On Linux, you can use the userland "xboxdrv" driver to have non-XInput 
 FaB is a 2D "player vs. player" deathmatch game. Terrain is randomly generated and the players are dropped in. Each player is armed with four different weapons. After a player "frags" another player using a weapon of their choice, they are awarded a point. The terrain is fully destructible, so it can be changed by weapons and by players digging. Projectiles can be reflected by using the "dash." Dashing not only provides enhanced mobility, but also creates a shield to reflect projectiles.
 
 There are four weapons in the game:
-1. Six Shooter
+1. **Six Shooter**
   - The Six Shooter is the fastest weapon and has the best range.
-2. Flamethrower
+2. **Flamethrower**
   - The Flamethrower's range is abysmal, but up close, it can wipe out a player with full health in a split second.
-3. Shotgun
+3. **Shotgun**
   - The Shotgun has slightly better range than the Flamethrower and the cost of spread and worse damage.
-4. Grenade Launcher
+4. **Grenade Launcher**
   - The Grenade Launcher can destroy large chunks of terrain and players with its high blast radius. The downside is, the grenade has an arcing path by virtue of being heavy.
