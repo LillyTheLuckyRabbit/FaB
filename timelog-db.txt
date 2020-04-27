@@ -90,3 +90,26 @@ On 4/21, I spent about 2 hours doing the following:
 	-Fixed the bugs with terrain generation
 		-Turns out the algorithm was sometimes going out of scope for the right/up bounds of the level
 	-Finished presentation slides with Will
+
+On 4/25, I spent a little bit doing the following:
+	-Added more bullet sprites in preparation for tomorrow
+	
+On 4/26, I spent 4 hours doing the following:
+	-It's my birthday today so that means this project gets a birthday wish bonus I'm pretty sure.
+	-Remembered to use a timer so I could actually report an accurate number of hours for once instead of approximating
+	-Adding/tweaking weapons
+		-Changed code for weapon gravity and acceleration
+			-May still be buggy
+		-Added Six shooter, Flamethrower, Shotgun, and Laser weapons
+		-Added weapon spread
+			-There's an interesting bug with weapon spread that causes the squid character to spaz out with their gun
+		-Added weapon auto fire
+			-Players can just hold down the fire button instead of pressing it over and over
+	-Modified a few other things
+		-Fixed a bug where players would get stuck shooting after dying
+		-Tweaked the dash reflect slightly
+			-Dash reflect may need to be nerfed some more :/
+	-Noted bugs:
+		-There's still a bug where players don't have gravity for a bit after dying
+		-Players can spam jump when against the level borders to go up
+			-Likewise, players can sometimes glitch upwards through terrain by spamming jump
