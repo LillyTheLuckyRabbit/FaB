@@ -495,7 +495,7 @@ bool Player::update(int deltaTime, const Terrain& T, list<Bullet>& bulletList) {
 		}
 	}
 
-	return (score == goal);
+	return (score >= goal);
 }
 
 //Check the direction of the terrain/level border that the player is colliding with

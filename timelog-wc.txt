@@ -58,3 +58,7 @@
 2020-04-26
 14:30 - 15:00 - Added weapon switching and fixed bullet double update bug.
 15:15 - 17:00 - Made sound effects
+
+2020-04-27
+11:00 - 14:00 - Implemented sound effects, tweaked bullet collision, implemented grenade
+		launcher.
