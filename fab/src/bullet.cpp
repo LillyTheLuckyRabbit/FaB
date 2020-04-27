@@ -6,8 +6,8 @@
 
 #include "bullet.h"
 
-//Copy constructor
-Bullet::Bullet(int pNum, int iPosX, int iPosY, int iVelx, int iVelY, string texturePath, int iDam, int iGrav, double iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer) {
+//Parameter constructor
+Bullet::Bullet(int pNum, int iPosX, int iPosY, int iVelx, int iVelY, string texturePath, Mix_Chunk* iSound, int iDam, int iGrav, double iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer) {
 	playerNum = pNum;
 	posX = iPosX;
 	posY = iPosY;
@@ -23,6 +23,8 @@ Bullet::Bullet(int pNum, int iPosX, int iPosY, int iVelx, int iVelY, string text
 	numBounces = iNumBounce;
 	impactPlayer = iPlayer;
 
+	impactSound = iSound;
+
 	if(!bulletTexture.loadFromFile(texturePath)) {
 		cout << "Failed to load bullet texture!" << endl;
 		width = 0;
@@ -34,7 +36,13 @@ Bullet::Bullet(int pNum, int iPosX, int iPosY, int iVelx, int iVelY, string text
 }
 
 //Bullet update function. When returning true, the bullet has hit something and is deleted.
-bool Bullet::update(int deltaTime, vector<int> &terrainUpdateList, Terrain& T, Player* (&players)[4], int numPlayers) {
+bool Bullet::update(int deltaTime, vector<int>& terrainUpdateList, Terrain& T, Player* (&players)[4], int numPlayers) {
+	bool exitCondition = false;
+	bool hitPlayer = false;
+	bool collidesWithTerrain = false;
+	if((posX < 0 || posY < 0) || (posX > LEVEL_WIDTH || posY > LEVEL_HEIGHT)) {
+		collidesWithTerrain = true;
+	}
 	int deltaX = 0;
 	velX = trunc(velX + deltaTime / 1000.0);
 	if(velX) {
@@ -53,32 +61,35 @@ bool Bullet::update(int deltaTime, vector<int> &terrainUpdateList, Terrain& T, P
 				if(posY + height >= players[i]->getY() && posY <= players[i]->getY() + players[i]->getH()) {
 					if(players[i]->getAlive()) {
 						players[i]->doDamage(damage);
+						hitPlayer = true;
 						if(players[i]->getHealth() <= 0) {
-							players[playerNum-1]->incrementScore();
+							players[playerNum - 1]->incrementScore();
 						}
 						if(impactPlayer) {
-							return true;
+							exitCondition = true;
 						}
+						collidesWithTerrain = true;
 					}
 				}
 			}
 		}
 	}
-	bool collidesWithTerrain = false;	
-	int centerX = (width / 2) + posX;
-	int centerY = (height / 2) + posY;
-	for(int y = -radius; y <= radius; y++) {
-		for(int x = -radius; x <= radius; x++) {
-			if(x * x + y * y < radius * radius) {
-				if(T.getValueAtXY(centerX + x, centerY + y) == 1) {
-					collidesWithTerrain = true;
-					break;
-				}
+	for(int y = 0; y < height; y++) {
+		for(int x = 0; x < width; x++) {
+			if(T.getValueAtXY(posX + x, posY + y) == 1) {
+				collidesWithTerrain = true;
+				break;
 			}
 		}
 		if(collidesWithTerrain) break;
 	}
 	if(collidesWithTerrain) {
+		if(Mix_PlayChannel(-1, impactSound, 0) == -1) {
+			cout << "Failed to play impact sound! Mix error: " << Mix_GetError() << endl;
+		}
+
+		int centerX = (width / 2) + posX;
+		int centerY = (height / 2) + posY;
 		for(int y = -radius; y <= radius; y++) {
 			for(int x = -radius; x <= radius; x++) {
 				if(x * x + y * y < radius * radius) {
@@ -88,24 +99,36 @@ bool Bullet::update(int deltaTime, vector<int> &terrainUpdateList, Terrain& T, P
 				}
 			}
 		}
+		if(!hitPlayer) {
+			for(int i = 0; i < numPlayers; i++) {
+				if(i != playerNum - 1) {
+					int pDistanceX = (players[i]->getW() / 2 + players[i]->getX()) - centerX;
+					int pDistanceY = (players[i]->getH() / 2 + players[i]->getY()) - centerY;
+					if(pDistanceX * pDistanceX + pDistanceY * pDistanceY < radius * radius) {
+						if(players[i]->getAlive()) {
+							players[i]->doDamage(damage);
+							if(players[i]->getHealth() <= 0) {
+								players[playerNum - 1]->incrementScore();
+							}
+						}
+					}
+				}
+			}
+		}
 		if(numBounces == 0) {
-			return(true);
+			exitCondition = true;
 		} else {
 			velX *= -bounciness;
 			velY *= -bounciness;
 			numBounces--;
 		}
 	}
-	if(timerBullet){//Bullet won't last forever, check if it should expire.
+	if(timerBullet) {  //Bullet won't last forever, check if it should expire.
 		lifetime--;
-		if (lifetime < 0) return true; //delete boolit
+		if(lifetime < 0) exitCondition = true;  //delete boolit
 	}
 
-	if((posX < 0 || posY < 0) || (posX > LEVEL_WIDTH || posY > LEVEL_HEIGHT)) {
-		return(true);
-	}
-
-	return(false);
+	return (exitCondition);
 }
 
 void Bullet::render(int camX, int camY, int vX, int vY) {
@@ -117,13 +140,15 @@ void Bullet::render(int camX, int camY, int vX, int vY) {
 
 //Reverses the bullet's direction of velocity (such as when the bullet gets reflected)
 void Bullet::reverseVel(int pNum) {
-	playerNum = pNum;
-	velX = -velX;
-	velY = -velY;
+	if(playerNum != pNum) {
+		playerNum = pNum;
+		velX = -velX;
+		velY = -velY;
+	}
 }
 
-//Copy constructor
-Weapon::Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, int iDam, int iGrav, double iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer, int iSpread, int iCount) {
+//Paramter constructor
+Weapon::Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, string iFireSound, string iImpactSound, int iDam, int iGrav, double iAX, int iRad, bool iTime, int iLifetime, double iBounce, int iNumBounce, bool iPlayer, int iSpread, int iCount, bool iOneSound) {
 	weaponName = name;
 	totalAmmo = iAmmo;
 	ammo = iAmmo;
@@ -142,28 +167,61 @@ Weapon::Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel,
 	bulletTexturePath = iBTexture;
 	spread = iSpread;
 	count = iCount;
-	//carly = iCarly; B)
+	impactSound = Mix_LoadWAV(iImpactSound.c_str());
+	oneSound = iOneSound;
+	fireSound = Mix_LoadWAV(iFireSound.c_str());
+	if(fireSound == NULL) {
+		cout << "Failed to load weapon firing sound '" << iFireSound << "'! Mix Error:" << Mix_GetError() << endl;
+	}
+	fireSoundChnl = -1;
 
 	currentReloadTime = reloadTime;
 	currentShotTime = shotTime;
-	
 }
 
-void Weapon::shoot(vector<Bullet>& bulletVec, int playerNum, int angle, int pCenterX, int pCenterY) {
+Weapon::~Weapon() {
+	if(fireSound) {
+		Mix_FreeChunk(fireSound);
+		fireSound = NULL;
+		fireSoundChnl = -1;
+	}
+	if(impactSound) {
+		Mix_FreeChunk(impactSound);
+		impactSound = NULL;
+	}
+}
+
+void Weapon::shoot(list<Bullet>& bulletList, int playerNum, int angle, int pCenterX, int pCenterY) {
 	if(currentShotTime == shotTime && ammo) {
 		int velX = getXComp(angle, fireVel);
 		int velY = getYComp(angle, fireVel);
 		int posX = getXComp(angle, 30) + pCenterX;
 		int posY = getYComp(angle, 30) + pCenterY;
-		bulletVec.emplace_back(playerNum, posX, posY, velX, velY, bulletTexturePath, damage, gravity, accelX, radius, timerBullet, lifetime, bounciness, numBounces, impactPlayer);
+		bulletList.emplace_back(playerNum, posX, posY, velX, velY, bulletTexturePath, impactSound, damage, gravity, accelX, radius, timerBullet, lifetime, bounciness, numBounces, impactPlayer);
 		currentShotTime -= 1;
 		ammo--;
+		if(fireSoundChnl == -1 || !oneSound) {
+			fireSoundChnl = Mix_PlayChannel(-1, fireSound, 0);
+		}
+	}
+}
+
+void Weapon::stopFireSound() {
+	if(oneSound) {
+		if(fireSoundChnl != -1) {
+			Mix_HaltChannel(fireSoundChnl);
+			fireSoundChnl = -1;
+		}
 	}
 }
 
 //Weapon update function. Also handles reloading and shot delay.
 void Weapon::update(int deltaTime) {
-	if(!ammo) currentReloadTime -= deltaTime;
+	if(!ammo) {
+		currentReloadTime -= deltaTime;
+		stopFireSound();
+	}
+
 	if(currentShotTime < shotTime) currentShotTime -= deltaTime;
 
 	if(currentReloadTime < 0) {

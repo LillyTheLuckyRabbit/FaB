@@ -28,6 +28,7 @@
 #include <vector>
 #include <sstream>
 #include <cstring>		//Used by memcpy (according to compiler)
+#include <list>
 
 using std::cin;
 using std::cout;
@@ -35,5 +36,6 @@ using std::endl;
 using std::string;
 using std::vector;
 using std::stringstream;
+using std::list;
 
 #endif

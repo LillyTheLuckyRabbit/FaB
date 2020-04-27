@@ -123,7 +123,7 @@ Player::Player(int num, int scoreToWin) {
 	}
 	walkLoopSnd = Mix_LoadWAV("sound/walkLoop.wav");
 	if(walkLoopSnd == NULL) {
-		cout << "Failed to load walk looop sound." << endl;
+		cout << "Failed to load walk loop sound." << endl;
 	}
 	walkLoopChnl = Mix_PlayChannel(-1, walkLoopSnd, -1);
 	if(walkLoopChnl == -1) {
@@ -131,15 +131,13 @@ Player::Player(int num, int scoreToWin) {
 	}
 	Mix_Pause(walkLoopChnl);
 
-	//	Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, double iDam, int iGrav = 0, double iAX = 0, int iRad = 4, bool iTime = false, int iLifetime = 0, double iBounce = 1.0, int iNumBounce = 0, bool iPlayer = true, int spread = 0);
+	//	Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel, string iBTexture, int iDam, int iGrav = 0, double iAX = 0, int iRad = 4, bool iTime = false, int iLifetime = 0, double iBounce = 1.0, int iNumBounce = 0, bool iPlayer = true, int spread = 0);
 
 	//Player's weapon inventory (Max of 4)
-	weaponInv.emplace_back("Six shooter", 6, 1000, 300, 1800, "sprites/bullet.png", 20, 0, 1.0, 5);
-	weaponInv.emplace_back("Flamethrower", 50, 1250, 10, 450, "sprites/fire.png", 2, -200, 0.97, 2, true, 75, 0.1, -1);
-	weaponInv.emplace_back("Shotgun", 8, 1400, 0, 1000, "sprites/bullet.png", 7, 0, 0.995, 3, true, 60, 0.76, 1, true, 20, 5);
-	weaponInv.emplace_back("Grenade Launcher", 3, 2000, 700, 700, "sprites/bomb.png", 30, 500, 0.985, 10, false, 10000, 0.3, 5);
-	//weaponInv.emplace_back("Mine", 2, 2000, 400, 600, "sprites/bomb.png", 2, 500, 0.95, 10, true, 10000, 0.3, -1);
-	//weaponInv.emplace_back("Leighzuurg", 3, 1500, 50, 700, "sprites/laser.png", 10, 0, 1.0, 5, false, 0, 1.0, 3);
+	weaponInv[0] = new Weapon("Six Shooter", 6, 1000, 300, 1800, "sprites/bullet.png", "sound/pistolFire.wav", "sound/pistolHit.wav", 20, 0, 1.0, 5);
+	weaponInv[1] = new Weapon("Flamethrower", 100, 1250, 10, 450, "sprites/fire.png", "sound/flamethrower.wav", "sound/silence.wav", 2, -200, 0.97, 10, true, 75, -0.25, -1, true, 0, 1, true);
+	weaponInv[2] = new Weapon("Shotgun", 8, 1400, 0, 1000, "sprites/bullet.png", "sound/pistolFire.wav", "sound/pistolHit.wav", 7, 0, 0.995, 3, true, 60, 0.76, 1, true, 20, 5);
+	weaponInv[3] = new Weapon("Grenade Launcher", 3, 2000, 700, 700, "sprites/bomb.png", "sound/bombFire.wav", "sound/bombBoom.wav", 30, 750, 0.999999, 50, false, 0, 1.0, 0);
 }
 
 //Default constructor
@@ -151,6 +149,39 @@ Player::~Player() {
 	if(controllerPtr) {
 		SDL_GameControllerClose(controllerPtr);
 		controllerPtr = NULL;
+	}
+	if(jumpSnd) {
+		Mix_FreeChunk(jumpSnd);
+		jumpSnd = NULL;
+	}
+	if(deadSnd) {
+		Mix_FreeChunk(deadSnd);
+		deadSnd = NULL;
+	}
+	if(respawnSnd) {
+		Mix_FreeChunk(respawnSnd);
+		respawnSnd = NULL;
+	}
+	if(reflectSnd) {
+		Mix_FreeChunk(reflectSnd);
+		reflectSnd = NULL;
+	}
+	if(dashSnd) {
+		Mix_FreeChunk(dashSnd);
+		dashSnd = NULL;
+	}
+	if(digSnd) {
+		Mix_FreeChunk(digSnd);
+		digSnd = NULL;
+	}
+	if(walkLoopSnd) {
+		Mix_FreeChunk(walkLoopSnd);
+		walkLoopSnd = NULL;
+		walkLoopChnl = -1;
+	}
+
+	for(int i = 0; i < 4; i++) {
+		delete weaponInv[i];
 	}
 }
 
@@ -229,13 +260,14 @@ bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terra
 //Shoot button
 //Turns the shooting on/off depending on if the player is holding the right trigger down.
 //The actual shoot function is then done in player update.
-void Player::inputRightTrigger(const SDL_Event& e, vector<Bullet>& bulletVec) {
+void Player::inputRightTrigger(const SDL_Event& e) {
 	if(alive) {
 		if(e.caxis.value > 2500) {
 			shoot = true;
 			
 		} else if(e.caxis.value == 0) {
 			shoot = false;
+			weaponInv[currentWeapon]->stopFireSound();
 		}
 	}
 }
@@ -289,7 +321,7 @@ void Player::switchWeapon(int wepNum) {
 }
 
 //Update player function
-bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) {
+bool Player::update(int deltaTime, const Terrain& T, list<Bullet>& bulletList) {
 	//Adjust camera
 	if(posX - camera.x < camera.w / 6 && camera.x > 0) {
 		camera.x -= 2;
@@ -407,7 +439,7 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 		}
 	}
 
-	weaponInv[currentWeapon].update(deltaTime);
+	weaponInv[currentWeapon]->update(deltaTime);
 
 	//Kill players that have no health left
 	if(health <= 0 && alive) {
@@ -437,7 +469,7 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 		int centerX = posX + width / 2;
 		int centerY = posY + height / 2;
 		int radius = circle.getWidth() / 2;
-		for(auto i = bulletVec.begin(); i != bulletVec.end(); i++) {
+		for(auto i = bulletList.begin(); i != bulletList.end(); i++) {
 			if(i->getX() + i->getH() >= centerX - radius && i->getX() <= centerX + radius) {
 				if(i->getY() + i->getH() >= centerY - radius && i->getY() <= centerY + radius) {	
 					i->reverseVel(playerNumber);
@@ -453,12 +485,12 @@ bool Player::update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec) 
 				//shooting multiple bullets in one tick seems to be buggy atm
 				//for (int i = 0; i < weaponInv[currentWeapon].getCount(); i++){
 					//Adjust spread for low accuracy weapons
-					int bulletSpread = weaponInv[currentWeapon].getSpread();
+					int bulletSpread = weaponInv[currentWeapon]->getSpread();
 					if (bulletSpread){
 						angle += trunc((rand() % bulletSpread)-(bulletSpread/2));
 						angle %= 360;
 					}
-					weaponInv[currentWeapon].shoot(bulletVec, playerNumber, angle, posX + width / 2, posY + height / 2);
+					weaponInv[currentWeapon]->shoot(bulletList, playerNumber, angle, posX + width / 2, posY + height / 2);
 				//}
 		}
 	}
@@ -535,18 +567,18 @@ void Player::renderHud(int camX, int camY, int vX, int vY) {
 	hudText << "Health: " << health;
 	textRenderer.render(textRenderer.getFontW() + vX, camera.h - textRenderer.getFontH() - 4 + vY, hudText.str());
 
-	if(weaponInv[currentWeapon].isReloading()) {
+	if(weaponInv[currentWeapon]->isReloading()) {
 		hudText.str("");
 		hudText << "Reloading...";
 		textRenderer.render(textRenderer.getFontW() + vX, camera.h - 2 * textRenderer.getFontH() - 4 + vY, hudText.str());
 	} else {
 		hudText.str("");
-		hudText << "Ammo: " << weaponInv[currentWeapon].getAmmo() << "/" << weaponInv[currentWeapon].getTotal();
+		hudText << "Ammo: " << weaponInv[currentWeapon]->getAmmo() << "/" << weaponInv[currentWeapon]->getTotal();
 		textRenderer.render(textRenderer.getFontW() + vX, camera.h - 2 * textRenderer.getFontH() - 4 + vY, hudText.str());
 	}
 
 	hudText.str("");
-	hudText << currentWeapon + 1 << ". " << weaponInv[currentWeapon].getName();
+	hudText << currentWeapon + 1 << ". " << weaponInv[currentWeapon]->getName();
 	textRenderer.render(textRenderer.getFontW() + vX, camera.h - 3 * textRenderer.getFontH() - 4 + vY, hudText.str());
 
 	hudText.str("");

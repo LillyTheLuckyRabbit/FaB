@@ -59,7 +59,7 @@ void gameLoop(int numPlayers) {
 	vector<int> terrainUpdateList;
 	terrainUpdateList.clear();
 
-	vector<Bullet> bulletVec;
+	list<Bullet> bulletList;
 
 	while(!quit) {
 		frameTimer.newFrame();
@@ -82,7 +82,7 @@ void gameLoop(int numPlayers) {
 					players[e.caxis.which]->inputLeftTrigger(e, T, terrainUpdateList);
 				}
 				if(e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT) {
-					players[e.caxis.which]->inputRightTrigger(e, bulletVec);
+					players[e.caxis.which]->inputRightTrigger(e);
 				}
 			} else if(e.type == SDL_CONTROLLERBUTTONDOWN) {
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
@@ -112,14 +112,14 @@ void gameLoop(int numPlayers) {
 
 		// Player update loop
 		for(int i = 0; i < numPlayers; i++) {
-			if(players[i]->update(frameTimer.getDelta(), T, bulletVec)) quit = true;
+			if(players[i]->update(frameTimer.getDelta(), T, bulletList)) quit = true;
 		}
 		
 		// Update entities
-		for(auto i = bulletVec.begin(); i != bulletVec.end();) {
+		for(auto i = bulletList.begin(); i != bulletList.end();) {
 			if(i->update(frameTimer.getDelta(), terrainUpdateList, T, players, numPlayers)) {
-				i = bulletVec.erase(i);
-				if(bulletVec.empty()) break;
+				i = bulletList.erase(i);
+				if(bulletList.empty()) break;
 			} else {
 				i++;
 			}
@@ -178,7 +178,7 @@ void gameLoop(int numPlayers) {
 				}
 			}
 
-			for(auto b = bulletVec.begin(); b != bulletVec.end(); b++) {
+			for(auto b = bulletList.begin(); b != bulletList.end(); b++) {
 				b->render(currentCamera.x, currentCamera.y, viewports[i].x, viewports[i].y);
 			}
 

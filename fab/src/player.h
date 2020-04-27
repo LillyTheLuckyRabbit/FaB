@@ -28,9 +28,9 @@ class Player {
 	void inputRightStickY(const SDL_Event& e);
 	bool inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terrainUpdateList);
 	void inputLBDown(const SDL_Event& e);
-	void inputRightTrigger(const SDL_Event& e, vector<Bullet>& bulletVec);
+	void inputRightTrigger(const SDL_Event& e);
 
-	bool update(int deltaTime, const Terrain& T, vector<Bullet>& bulletVec);
+	bool update(int deltaTime, const Terrain& T, list<Bullet>& bulletList);
 	int checkCollision(const Terrain& T);
 
 	void render(int camX, int camY, int vX, int vY, bool cross);
@@ -82,7 +82,7 @@ class Player {
 	bool alive;
 	int respawnTime;
 
-	vector<Weapon> weaponInv;
+	Weapon* weaponInv[4];
 	int currentWeapon = 0;
 
 	SDL_GameController* controllerPtr;
