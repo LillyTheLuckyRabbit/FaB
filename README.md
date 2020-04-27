@@ -3,9 +3,9 @@
 ## Compiling
 To compile, use the enclosed Makefile in the 'fab' folder. On Arch Linux / Manjaro, the following packages are required:
 
-sdl2
-sdl2_mixer
-sdl2_image
+-sdl2
+-sdl2_mixer
+-sdl2_image
 
 On Windows, you can compile using MinGW. Check this link for more info: https://lazyfoo.net/tutorials/SDL/01_hello_SDL/windows/mingw/index.php
 
@@ -15,12 +15,12 @@ The game requires two XInput controllers to be attached to the computer. If only
 PRO TIP: On Linux, you can use the userland "xboxdrv" driver to have non-XInput controllers mimic XInput controllers. Optionally, you can also use Steam, but your mileage may vary depending on the controller. From our experience, "xboxdrv" does better with lesser known controllers while Steam has good support for mainstream controllers (Dualshock 4, Switch Pro, etc).
 
 ## Controls
-**Left Stick:** Move
-**Right Stick:** Aim
-**Left Trigger:** Dig
-**Right Trigger:** Shoot
-**Left Bumper:** Dash
-**Right Bumper:** Jump
+-**Left Stick:** Move
+-**Right Stick:** Aim
+-**Left Trigger:** Dig
+-**Right Trigger:** Shoot
+-**Left Bumper:** Dash
+-**Right Bumper:** Jump
 
 ## How to Play
 FaB is a 2D "player vs. player" deathmatch game. Terrain is randomly generated and the players are dropped in. Each player is armed with four different weapons. After a player "frags" another player using a weapon of their choice, they are awarded a point. The terrain is fully destructible, so it can be changed by weapons and by players digging. Projectiles can be reflected by using the "dash." Dashing not only provides enhanced mobility, but also creates a shield to reflect projectiles.
