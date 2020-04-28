@@ -12,5 +12,8 @@
 /fab/debug.txt
 /fab/input.txt
 /fab/LICENSE.*
+/fab/src/input.tx
 /fab/output.txt
+/fab/src/TERRAIN_BACKUP.txt
+/fab/sound/DELETEME
 vgcore*
