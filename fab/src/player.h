@@ -76,6 +76,7 @@ class Player {
 
 	bool grounded;
 	int dashTime;
+	int dashLag;
 	bool dashAvail;
 	bool dig;
 	bool shoot;
