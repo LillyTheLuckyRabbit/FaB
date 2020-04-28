@@ -1,6 +1,6 @@
 CXX=		g++
 CXXFLAGS=	-g -Wall -std=gnu++11
-LDFLAGS=	-lSDL2 -lSDL2_image -lSDL2_mixer
+LDFLAGS=	-no-pie -lSDL2 -lSDL2_image -lSDL2_mixer
 SHELL=		bash
 PROGRAMS=	fab
 SOURCES=	src/main.cpp src/texture.cpp src/deltaclock.cpp src/player.cpp src/angle.cpp src/bullet.cpp src/terrain.cpp src/text.cpp src/game.cpp
