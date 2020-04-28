@@ -16,7 +16,11 @@ Player::Player(int num, int scoreToWin) {
 	width = 29;
 	height = 29;
 	posX = rand() % (LEVEL_WIDTH - width);
+	//posX /= 5;
+	//posX += LEVEL_WIDTH / 5;
 	posY = rand() % (LEVEL_HEIGHT - height);
+	//posY /= 5;
+	//posY += LEVEL_WIDTH / 5;
 	velX = 0;
 	velY = 0;
 	accelX = 0;
@@ -92,6 +96,7 @@ Player::Player(int num, int scoreToWin) {
 	grounded = false;
 	dashAvail = true;
 	dashTime = 0;
+	dashLag = 0;
 	dig = true;
 	shoot = false;
 	alive = true;
@@ -282,7 +287,8 @@ void Player::inputLBDown(const SDL_Event& e) {
 				gravity = PLAYER_HIGHGRAV;
 				grounded = false;
 				dashAvail = false;
-				dashTime = 500;
+				dashTime = 500; //How many ticks the player is invulnerable for a dash
+				dashLag = 900; //How much time the player has after dashing before they can dash again
 				Mix_PlayChannel(-1, dashSnd, 0);
 			}
 		}
@@ -349,8 +355,9 @@ bool Player::update(int deltaTime, const Terrain& T, list<Bullet>& bulletList) {
 	}
 	
 	//Decrement the dash invulnerability if the player just used it
-	if(!dashAvail && dashTime > 0) {
+	if(!dashAvail && dashLag > 0) {
 		dashTime -= deltaTime;
+		dashLag -= deltaTime;
 	}
 
 	//Update where the player is aiming
@@ -400,7 +407,7 @@ bool Player::update(int deltaTime, const Terrain& T, list<Bullet>& bulletList) {
 	//Check if player is touching something
 	if(checkCollision(T)) {
 		if(deltaY > 0) grounded = true;
-		if(dashTime <= 0 && !dashAvail) {
+		if(dashLag <= 0 && !dashAvail) {
 			dashAvail = true;
 		}
 		if(checkCollision(T) < height / 2 && posY < LEVEL_HEIGHT - height) {
@@ -495,7 +502,7 @@ bool Player::update(int deltaTime, const Terrain& T, list<Bullet>& bulletList) {
 		}
 	}
 
-	return (score >= goal);
+	return (score == goal);
 }
 
 //Check the direction of the terrain/level border that the player is colliding with

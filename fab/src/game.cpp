@@ -1,3 +1,9 @@
+/* File: game.cpp
+   Author: William Coar and David Butler
+   Description: This file deals mainly with gameloop functions,
+   such as rendering, updating terrain/players/bullets, and so on.
+*/
+
 #include "game.h"
 
 //Forward declaration of globals
@@ -8,12 +14,14 @@ extern DeltaClock frameTimer;
 void gameLoop(int numPlayers) {
 	Uint32 format = SDL_GetWindowPixelFormat(gameWindow);
 
+	//Initialize players (and halve camera height if there are 3/4 players).
 	Player* players[4];
 	for(int i = 0; i < numPlayers; i++) {
 		players[i] = new Player(i + 1, 15);
 		if(numPlayers > 2) players[i]->halveCameraHeight();
 	}
 
+	//Create a random level
 	Terrain T(LEVEL_WIDTH,LEVEL_HEIGHT);
 	T.generateTerrain(players,numPlayers);
 
