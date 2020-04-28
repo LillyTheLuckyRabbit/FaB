@@ -15,6 +15,7 @@ SDL_Window* gameWindow = NULL;
 SDL_Renderer* gameRenderer = NULL;
 DeltaClock frameTimer;
 
+//Starts SDL and its subsystems
 bool initSdlWindow() {
 	bool success = true;
 	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0) {
@@ -47,6 +48,7 @@ bool initSdlWindow() {
 	return (success);
 }
 
+//Closes SDL and its subsystems
 void closeSdlWindow() {
 	SDL_DestroyRenderer(gameRenderer);
 	SDL_DestroyWindow(gameWindow);
@@ -58,14 +60,20 @@ void closeSdlWindow() {
 	SDL_Quit();
 }
 
+//Entrypoint. 'argc' and 'argv' aren't used, but are required for the game to compile on
+//Windows for some reason...
 int main(int argc, char* argv[]) {
 	//Reroute output to debug.txt for... uh... debugging.
 	#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 	freopen("debug.txt", "w", stdout);
 	#endif
-	
+
+	//Seed the random number generator using time	
 	srand(time(NULL));
+
 	if(!initSdlWindow()) return (1);
+
+	//If the player doesn't have enough controllers, let them know.
 	if(SDL_NumJoysticks() < 2) {
 		cout << "You don't have enough controllers connected." << endl;
 		cout << "TODO: We need to add support for hotplugging controllers." << endl;
@@ -73,6 +81,7 @@ int main(int argc, char* argv[]) {
 		return (1);
 	}
 
+	//This is almost a miniaturized verision of the game loop
 	bool quit = false;
 	bool startGame = false;
 	int numPlayers = 2;
@@ -89,9 +98,11 @@ int main(int argc, char* argv[]) {
 			} else if(e.type == SDL_CONTROLLERBUTTONDOWN) {
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) {
 					if(numPlayers < SDL_NumJoysticks()) {
+						// if DPAD -> and enough controllers, players++
 						numPlayers++;
 					}
 				} else if(e.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT) {
+					//if DPAD <- and players > 2, players--
 					if(numPlayers > 2) {
 						numPlayers--;
 					}

@@ -9,16 +9,20 @@
 extern SDL_Window* gameWindow;
 extern SDL_Renderer* gameRenderer;
 
+//Default contructor
 TextureWrapper::TextureWrapper() {
 	texturePtr = NULL;
 	textureWidth = 0;
 	textureHeight = 0;
 }
 
+//Calls the free member to deallocate the texture
 TextureWrapper::~TextureWrapper() {
 	free();
 }
 
+//Deallocates any existing texture, loads a sprite to a surface, and converts
+//the surface to a texture
 bool TextureWrapper::loadFromFile(string path) {
 	free();
 
@@ -41,6 +45,7 @@ bool TextureWrapper::loadFromFile(string path) {
 	return texturePtr != NULL;
 }
 
+//Deallocates the texture
 void TextureWrapper::free() {
 	if(texturePtr != NULL) {
 		SDL_DestroyTexture(texturePtr);
@@ -50,6 +55,7 @@ void TextureWrapper::free() {
 	}
 }
 
+//Basically a wrapper for SDL_RenderCopyEx
 void TextureWrapper::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip) {
 	SDL_Rect renderQuad = {x, y, textureWidth, textureHeight};
 	if(clip != NULL) {
@@ -62,15 +68,17 @@ void TextureWrapper::render(int x, int y, SDL_Rect* clip, double angle, SDL_Poin
 int TextureWrapper::getWidth() {
 	return textureWidth;
 }
-
 int TextureWrapper::getHeight() {
 	return textureHeight;
 }
 
+//Set the amount of red, green, and blue in a texture
 void TextureWrapper::setColor(Uint8 red, Uint8 green, Uint8 blue) {
 	SDL_SetTextureColorMod(texturePtr, red, green, blue);
 }
 
+//Blend modes can be used for more complex texture blending
+//SDL's built-in modes are additive blending, color modulation, and alpha blending
 void TextureWrapper::setBlendMode(SDL_BlendMode blending) {
 	SDL_SetTextureBlendMode(texturePtr, blending);
 }
@@ -79,6 +87,9 @@ void TextureWrapper::setAlpha(Uint8 alpha) {
 	SDL_SetTextureAlphaMod(texturePtr, alpha);
 }
 
+//Streaming textures can be modified on a per-pixel basis
+
+//Default contructor
 TextureWrapperStreaming::TextureWrapperStreaming() {
 	texturePtr = NULL;
 	textureWidth = 0;
@@ -87,6 +98,7 @@ TextureWrapperStreaming::TextureWrapperStreaming() {
 	pitch = 0;
 }
 
+//Deallocate function
 void TextureWrapperStreaming::free() {
 	if(texturePtr != NULL) {
 		SDL_DestroyTexture(texturePtr);
@@ -98,6 +110,8 @@ void TextureWrapperStreaming::free() {
 	}
 }
 
+//Deallocates any existing texture, loads a sprite to a surface, and converts
+//the surface to a texture
 bool TextureWrapperStreaming::loadFromFile(string path) {
 	free();
 
@@ -136,6 +150,7 @@ bool TextureWrapperStreaming::loadFromFile(string path) {
 	return texturePtr != NULL;
 }
 
+//Creates a blank texture
 bool TextureWrapperStreaming::createBlank(int w, int h) {
 	free();
 
@@ -153,6 +168,7 @@ bool TextureWrapperStreaming::createBlank(int w, int h) {
 	return texturePtr != NULL;
 }
 
+//Locks texture, allowing modification
 bool TextureWrapperStreaming::lockTexture() {
 	bool success = true;
 
@@ -169,6 +185,7 @@ bool TextureWrapperStreaming::lockTexture() {
 	return success;
 }
 
+//Unlocks texture, disallowing modification
 bool TextureWrapperStreaming::unlockTexture() {
 	bool success = true;
 

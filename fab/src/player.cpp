@@ -15,17 +15,16 @@ Player::Player(int num, int scoreToWin) {
 
 	width = 29;
 	height = 29;
+
+	//Initialize position and physics variables
 	posX = rand() % (LEVEL_WIDTH - width);
-	//posX /= 5;
-	//posX += LEVEL_WIDTH / 5;
 	posY = rand() % (LEVEL_HEIGHT - height);
-	//posY /= 5;
-	//posY += LEVEL_WIDTH / 5;
 	velX = 0;
 	velY = 0;
 	accelX = 0;
 	accelDir = 0;
 
+	//Initialize camera
 	camera.h = RENDER_HEIGHT;
 	camera.w = RENDER_WIDTH / 2;
 	camera.x = posX - RENDER_WIDTH / 4;
@@ -88,11 +87,13 @@ Player::Player(int num, int scoreToWin) {
 	textRenderer.loadFont("sprites/font.png", 17, 16);
 	calamari.loadFromFile("sprites/calamari.png");
 
+	//Competitive variables
 	health = 100;
 	score = 0;
 	goal = scoreToWin;
 	respawnTime = 10000;
 
+	//Movement variables not related to physics
 	grounded = false;
 	dashAvail = true;
 	dashTime = 0;
@@ -150,6 +151,7 @@ Player::Player() {
 	controllerPtr = NULL;
 }
 
+//Decontructor
 Player::~Player() {
 	if(controllerPtr) {
 		SDL_GameControllerClose(controllerPtr);
@@ -191,6 +193,8 @@ Player::~Player() {
 }
 
 //Moving left/right
+//The actual movement is handled in the update function. This sets the
+//'intended direction.'
 void Player::inputLeftStick(const SDL_Event& e) {
 	if(alive) {
 		if(e.caxis.value > 2000) {
@@ -229,6 +233,8 @@ bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terra
 				int radius = 20;
 				int centerX = (width / 2 + getXComp(angle, radius)) + posX;
 				int centerY = (height / 2 + getYComp(angle, radius)) + posY;
+				
+				//Check for terrain
 				for(int y = -radius; y <= radius; y++) {
 					for(int x = -radius; x <= radius; x++) {
 						if(x * x + y * y < radius * radius) {
@@ -240,6 +246,8 @@ bool Player::inputLeftTrigger(const SDL_Event& e, Terrain& T, vector<int>& terra
 					}
 					if(containsTerrain) break;
 				}
+
+				//If there's terrain, go for it
 				if(containsTerrain) {
 					for(int y = -radius; y <= radius; y++) {
 						for(int x = -radius; x <= radius; x++) {
@@ -404,12 +412,14 @@ bool Player::update(int deltaTime, const Terrain& T, list<Bullet>& bulletList) {
 	if(velY >= 0) gravity = PLAYER_HIGHGRAV;
 	velY = velY + (gravity * deltaTime / 1000.0);
 
-	//Check if player is touching something
+	//Check if player is touching something and move them if needed
 	if(checkCollision(T)) {
 		if(deltaY > 0) grounded = true;
 		if(dashLag <= 0 && !dashAvail) {
 			dashAvail = true;
 		}
+		//Checking if the height of the collision is on the player's lower half
+		//allows for moving up slopes
 		if(checkCollision(T) < height / 2 && posY < LEVEL_HEIGHT - height) {
 			posY -= checkCollision(T);
 			velY = 0;
@@ -446,6 +456,7 @@ bool Player::update(int deltaTime, const Terrain& T, list<Bullet>& bulletList) {
 		}
 	}
 
+	//Update weapon reloading and shot cooldown
 	weaponInv[currentWeapon]->update(deltaTime);
 
 	//Kill players that have no health left
@@ -522,13 +533,17 @@ int Player::checkCollision(const Terrain& T) {
 
 //Render the player, the player's eye, and their gun
 void Player::render(int camX, int camY, int vX, int vY, bool cross) {
+	//Player orientation based on angle
+	//Fun easter egg: you can still change it when you're dead
 	SDL_RendererFlip flip;
 	if((angle >= -90 && angle <= 0) || (angle <= 90 && angle >= 0)) {
 		flip = SDL_FLIP_HORIZONTAL;
 	} else {
 		flip = SDL_FLIP_NONE;
 	}
+
 	if(alive) {
+		//The gun has to be flipped differently
 		SDL_RendererFlip gunFlip;
 		if((angle >= -90 && angle <= 0) || (angle <= 90 && angle >= 0)) {
 			gunFlip = SDL_FLIP_HORIZONTAL;
@@ -547,21 +562,30 @@ void Player::render(int camX, int camY, int vX, int vY, bool cross) {
 			gunPivot.y = 11;
 		}
 		gun.render((posX - camX) + vX + gunX, (posY - camY) + vY + gunY, NULL, angle, &gunPivot, gunFlip);
+		
+		//Render the player sprite
 		playerTexture.render((posX - camX) + vX, (posY - camY) + vY, NULL, 0, NULL, flip);
+		
+		//Render the eye
 		int eyeX = 10;
 		if(flip == SDL_FLIP_HORIZONTAL) eyeX = 11;
 		SDL_Point eyeCenter;
 		eyeCenter.x = 4;
 		eyeCenter.y = 4;
 		eyeTexture.render(posX - camX + eyeX + vX, posY - camY + 10 + vY, NULL, angle, &eyeCenter, SDL_FLIP_HORIZONTAL);
+		
+		//If needed, render the crosshair
 		if(cross) {
 			SDL_Point playerCenter;
 			playerCenter.x = -100;
 			playerCenter.y = 0;
 			crossHair.render(posX - camX + vX + 100, posY - camY + vY + height / 2, NULL, angle, &playerCenter);
 		}
+		
+		//If we're dashing, render the dash bubble
 		if(dashTime > 0) circle.render(posX - camX + vX - (circle.getWidth() / 2 - width / 2), posY - camY + vY - (circle.getHeight() / 2 - height / 2));
 	} else {
+		//Render the dead player
 		calamari.render((posX - camX) + vX, (posY - camY) + vY, NULL, 0, NULL, flip);
 	}
 }

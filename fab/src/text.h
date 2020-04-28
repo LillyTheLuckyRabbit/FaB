@@ -1,3 +1,8 @@
+/* File: text.h
+ * Authors: David Butler and William Coar
+ * Description: Declaration of text header
+*/
+
 #ifndef TEXT_H
 #define TEXT_H
 

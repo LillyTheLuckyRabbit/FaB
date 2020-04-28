@@ -11,10 +11,11 @@ extern SDL_Window* gameWindow;
 extern SDL_Renderer* gameRenderer;
 extern DeltaClock frameTimer;
 
+//Entry point for the *actual* game
 void gameLoop(int numPlayers) {
 	Uint32 format = SDL_GetWindowPixelFormat(gameWindow);
 
-	//Initialize players (and halve camera height if there are 3/4 players).
+	//Initialize players (and halve camera height if there are 3 or 4 players).
 	Player* players[4];
 	for(int i = 0; i < numPlayers; i++) {
 		players[i] = new Player(i + 1, 15);
@@ -25,6 +26,7 @@ void gameLoop(int numPlayers) {
 	Terrain T(LEVEL_WIDTH,LEVEL_HEIGHT);
 	T.generateTerrain(players,numPlayers);
 
+	//This is a handy vector to keep screen coordinates for the viewports
 	vector<SDL_Rect> viewports;
 	if(numPlayers == 2) {
 		viewports.push_back({0, 0, RENDER_WIDTH / 2, RENDER_HEIGHT});
@@ -46,6 +48,9 @@ void gameLoop(int numPlayers) {
 	TextureWrapperStreaming terrainMask;
 	terrainMask.createBlank(LEVEL_WIDTH, LEVEL_HEIGHT);
 	terrainMask.setBlendMode(SDL_BLENDMODE_MOD);
+	
+	//Initialize the terrain mask texture. This should be the only time
+	//we have to update the entire thing.
 	if(!terrainMask.lockTexture()) {
 		cout << "Unable to lock terrain texture!" << endl;
 	} else {
@@ -64,9 +69,12 @@ void gameLoop(int numPlayers) {
 		terrainMask.unlockTexture();
 		SDL_FreeFormat(mappingFormat);
 	}
+
+	//This list is used for partial texture updates on the terrain mask
 	vector<int> terrainUpdateList;
 	terrainUpdateList.clear();
 
+	//This list holds the bullet entities
 	list<Bullet> bulletList;
 
 	while(!quit) {
@@ -78,41 +86,56 @@ void gameLoop(int numPlayers) {
 				quit = true;
 			} else if(e.type == SDL_CONTROLLERAXISMOTION) {
 				if(e.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX) {
+					//Movement
 					players[e.caxis.which]->inputLeftStick(e);
 				}
 				if(e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX) {
+					//Aiming (X)
 					players[e.caxis.which]->inputRightStickX(e);
 				}
 				if(e.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTY) {
+					//Aiming (Y)
 					players[e.caxis.which]->inputRightStickY(e);
 				}
 				if(e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT) {
+					//Instead of have a seperate action function, digging is handled
+					//in the input function. That's why there's more parameters here
+					//than in the other functions you see.
 					players[e.caxis.which]->inputLeftTrigger(e, T, terrainUpdateList);
 				}
 				if(e.caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT) {
+					//Shooting
 					players[e.caxis.which]->inputRightTrigger(e);
 				}
 			} else if(e.type == SDL_CONTROLLERBUTTONDOWN) {
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
+					//Jumping
 					players[e.cbutton.which]->inputRBDown(e);
 				}
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
+					//Dashing
 					players[e.cbutton.which]->inputLBDown(e);
 				}
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_UP) {
+					//Weapon Slot 1
 					players[e.cbutton.which]->switchWeapon(0);
 				}
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_RIGHT) {
+					//Weapon Slot 2
 					players[e.cbutton.which]->switchWeapon(1);
 				}
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_DOWN) {
+					//Weapon Slot 3
 					players[e.cbutton.which]->switchWeapon(2);
 				}
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_DPAD_LEFT) {
+					//Weapon Slot 4
 					players[e.cbutton.which]->switchWeapon(3);
 				}
 			} else if(e.type == SDL_CONTROLLERBUTTONUP) {
 				if(e.cbutton.button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) {
+					//Raising gravity when jump button is released for
+					//tighter control
 					players[e.cbutton.which]->inputRBUp(e);
 				}
 			}
@@ -123,7 +146,7 @@ void gameLoop(int numPlayers) {
 			if(players[i]->update(frameTimer.getDelta(), T, bulletList)) quit = true;
 		}
 		
-		// Update entities
+		// Update entities (yes, two statement for loops *are* a thing)
 		for(auto i = bulletList.begin(); i != bulletList.end();) {
 			if(i->update(frameTimer.getDelta(), terrainUpdateList, T, players, numPlayers)) {
 				i = bulletList.erase(i);
@@ -163,6 +186,8 @@ void gameLoop(int numPlayers) {
 		for(int i = 0; i < numPlayers; i++) {
 			SDL_RenderSetClipRect(gameRenderer, &viewports[i]);
 			currentCamera = players[i]->getCamera();
+			
+			//Render tiling dirt texture
 			for(int y = 0; y < LEVEL_HEIGHT + dirtTexture.getWidth(); y += dirtTexture.getHeight()) {
 				for(int x = 0; x < LEVEL_WIDTH + dirtTexture.getWidth(); x += dirtTexture.getWidth()) {
 					if(x >= currentCamera.x - dirtTexture.getWidth()) {
@@ -172,11 +197,14 @@ void gameLoop(int numPlayers) {
 					}
 				}
 			}
+			//Render mask texture
 			terrainMask.render(0 + viewports[i].x, 0 + viewports[i].y, &currentCamera);
 
+			//Render players
 			for(int e = 0; e < numPlayers; e++) {
 				if(players[e]->getX() - currentCamera.x < currentCamera.w && players[e]->getX() - currentCamera.x > -(players[e]->getW())) {
 					if(players[e]->getY() - currentCamera.y < currentCamera.h && players[e]->getY() - currentCamera.y > -(players[e]->getH())) {
+						//Render the crosshair if the player is the one the viewport belongs to
 						if(e == i) {
 							players[e]->render(currentCamera.x, currentCamera.y, viewports[i].x, viewports[i].y, true);
 						} else {
@@ -186,17 +214,19 @@ void gameLoop(int numPlayers) {
 				}
 			}
 
+			//Render the bullets
 			for(auto b = bulletList.begin(); b != bulletList.end(); b++) {
 				b->render(currentCamera.x, currentCamera.y, viewports[i].x, viewports[i].y);
 			}
 
-
+			//Render the player HUDs
 			players[i]->renderHud(currentCamera.x, currentCamera.y, viewports[i].x, viewports[i].y);
 		}
 		SDL_RenderSetClipRect(gameRenderer, NULL);
 		SDL_RenderPresent(gameRenderer);
 	}
 
+	//Deallocate everything
 	for(int i = 0; i < numPlayers; i++) {
 		delete players[i];
 	}

@@ -40,9 +40,13 @@ bool Bullet::update(int deltaTime, vector<int>& terrainUpdateList, Terrain& T, P
 	bool exitCondition = false;
 	bool hitPlayer = false;
 	bool collidesWithTerrain = false;
+
+	//If the bullet is at the edge of the level, treat it like it collided with terrain
 	if((posX < 0 || posY < 0) || (posX > LEVEL_WIDTH || posY > LEVEL_HEIGHT)) {
 		collidesWithTerrain = true;
 	}
+
+	//Calculate X of displacement
 	int deltaX = 0;
 	velX = trunc(velX + deltaTime / 1000.0);
 	if(velX) {
@@ -51,10 +55,12 @@ bool Bullet::update(int deltaTime, vector<int>& terrainUpdateList, Terrain& T, P
 		posX += deltaX;
 	}
 
+	//Calculate Y of displacement
 	int deltaY = trunc(((velY * deltaTime) + .5 * gravity * (deltaTime * deltaTime) / 1000.0) / 1000.0);
 	posY += deltaY;
 	velY = velY + (gravity * deltaTime / 1000.0);
 
+	//Check collision with players
 	for(int i = 0; i < numPlayers; i++) {
 		if(i != playerNum - 1) {
 			if(posX + width >= players[i]->getX() && posX <= players[i]->getX() + players[i]->getW()) {
@@ -68,12 +74,15 @@ bool Bullet::update(int deltaTime, vector<int>& terrainUpdateList, Terrain& T, P
 						if(impactPlayer) {
 							exitCondition = true;
 						}
+						//Pretend we collided with terrain so we can calculate blast radius later
 						collidesWithTerrain = true;
 					}
 				}
 			}
 		}
 	}
+
+	//Check collision with terrain
 	for(int y = 0; y < height; y++) {
 		for(int x = 0; x < width; x++) {
 			if(T.getValueAtXY(posX + x, posY + y) == 1) {
@@ -83,11 +92,14 @@ bool Bullet::update(int deltaTime, vector<int>& terrainUpdateList, Terrain& T, P
 		}
 		if(collidesWithTerrain) break;
 	}
+
+	//If we collided with terrain
 	if(collidesWithTerrain) {
 		if(Mix_PlayChannel(-1, impactSound, 0) == -1) {
 			cout << "Failed to play impact sound! Mix error: " << Mix_GetError() << endl;
 		}
 
+		//Change the terrain
 		int centerX = (width / 2) + posX;
 		int centerY = (height / 2) + posY;
 		for(int y = -radius; y <= radius; y++) {
@@ -99,6 +111,8 @@ bool Bullet::update(int deltaTime, vector<int>& terrainUpdateList, Terrain& T, P
 				}
 			}
 		}
+
+		//Check the blast radius to see if we got any players
 		if(!hitPlayer) {
 			for(int i = 0; i < numPlayers; i++) {
 				if(i != playerNum - 1) {
@@ -115,6 +129,8 @@ bool Bullet::update(int deltaTime, vector<int>& terrainUpdateList, Terrain& T, P
 				}
 			}
 		}
+
+		//Do we bounce?
 		if(numBounces == 0) {
 			exitCondition = true;
 		} else {
@@ -123,14 +139,19 @@ bool Bullet::update(int deltaTime, vector<int>& terrainUpdateList, Terrain& T, P
 			numBounces--;
 		}
 	}
+
+	//Has the timer run out?
 	if(timerBullet) {  //Bullet won't last forever, check if it should expire.
 		lifetime--;
 		if(lifetime < 0) exitCondition = true;  //delete boolit
 	}
 
+	//If true, delete the bullet
 	return (exitCondition);
 }
 
+//The bullet function renders the bullet. It rotates the bullet, but you don't notice
+//because all of our sprites are round pellets right now.
 void Bullet::render(int camX, int camY, int vX, int vY) {
 	SDL_Point bulletCenter;
 	bulletCenter.x = width / 2;
@@ -179,6 +200,7 @@ Weapon::Weapon(string name, int iAmmo, int iReloadTime, int iShotTime, int iVel,
 	currentShotTime = shotTime;
 }
 
+//Weapon destructor for game end
 Weapon::~Weapon() {
 	if(fireSound) {
 		Mix_FreeChunk(fireSound);
@@ -191,6 +213,7 @@ Weapon::~Weapon() {
 	}
 }
 
+//This function creates a bullet
 void Weapon::shoot(list<Bullet>& bulletList, int playerNum, int angle, int pCenterX, int pCenterY) {
 	if(currentShotTime == shotTime && ammo) {
 		int velX = getXComp(angle, fireVel);
@@ -206,6 +229,8 @@ void Weapon::shoot(list<Bullet>& bulletList, int playerNum, int angle, int pCent
 	}
 }
 
+//If we have a weapon with one continuous sound (like the flamethrower) we need to
+//stop the sound when we run out of ammo of when we stop firing.
 void Weapon::stopFireSound() {
 	if(oneSound) {
 		if(fireSoundChnl != -1) {
@@ -234,6 +259,7 @@ void Weapon::update(int deltaTime) {
 	}
 }
 
+//Could've probably shortened this to "return(!ammo)" but I didn't write this one
 bool Weapon::isReloading() {
 	if(!ammo) {
 		return true;

@@ -1,3 +1,8 @@
+/* File: player.h
+ * Authors: David Butler and William Coar
+ * Description: Declaration of Player class and member functions
+*/
+
 #ifndef PLAYER_H
 #define PLAYER_H
 

@@ -83,7 +83,7 @@ class Weapon {
 
 	// Stats which will be passed on to the bullet
 	string bulletTexturePath;
-	Mix_Chunk* impactSound;
+	Mix_Chunk* impactSound; //Address is passed to the bullet instead of path because otherwise, the sound wouldn't play when destructed
 	double accelX;      //Horizontal acceleration. accelX == 1.0 = same speed, accelX < 1.0 = slows down.
 	int gravity;        //vertical acceleration; negative values indicate floating up (e.g., flame-thrower projectile)
 	int damage;         //Damage bullet deals per hitting player (player health max = 100.0)

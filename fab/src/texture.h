@@ -1,3 +1,7 @@
+/* File: texture.h
+ * Authors: David Butler and William Coar
+ * Description: Declaration of texture wrappers
+*/
 #ifndef TEXTURE_H
 #define TEXTURE_H
 

@@ -1,3 +1,7 @@
+/* File: deltaclock.h
+   Author: William Coar and David Butler
+   Description: Header for DeltaClock class.
+*/
 #ifndef DELTACLOCK_H
 #define DELTACLOCK_H
 
