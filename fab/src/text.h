@@ -1,5 +1,5 @@
 /* File: text.h
- * Authors: David Butler and William Coar
+ * Authors: David Butler and Lillian Coar
  * Description: Declaration of text header
 */
 

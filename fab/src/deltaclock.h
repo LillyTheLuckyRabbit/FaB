@@ -1,5 +1,5 @@
 /* File: deltaclock.h
-   Author: William Coar and David Butler
+   Author: Lillian Coar and David Butler
    Description: Header for DeltaClock class.
 */
 #ifndef DELTACLOCK_H

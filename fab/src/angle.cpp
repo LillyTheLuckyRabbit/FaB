@@ -1,5 +1,5 @@
 /* File: angle.cpp
- * Authors: David Butler and William Coar
+ * Authors: David Butler and Lillian Coar
  * Description: This file holds functions relating to trigonometry. Specifically,
  * the functions are for getting the x and y components of vectors and finding
  * an angle based on x and y components.

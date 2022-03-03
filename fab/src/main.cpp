@@ -1,5 +1,5 @@
 /* File: main.cpp
- * Authors: David Butler and William Coar
+ * Authors: David Butler and Lillian Coar
  * Description: Entry point and main loop for the game
 */
 

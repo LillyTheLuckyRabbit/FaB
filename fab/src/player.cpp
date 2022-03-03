@@ -1,5 +1,5 @@
 /* File: player.cpp
- * Authors: David Butler and William Coar
+ * Authors: David Butler and Lillian Coar
  * Description: Everything relating to the player lives in this class. This
  * includes the player's health, score, weapons, pointer to the controller, etc.
 */

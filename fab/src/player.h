@@ -1,5 +1,5 @@
 /* File: player.h
- * Authors: David Butler and William Coar
+ * Authors: David Butler and Lillian Coar
  * Description: Declaration of Player class and member functions
 */
 

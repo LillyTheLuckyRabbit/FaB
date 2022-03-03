@@ -1,5 +1,5 @@
 /* File: constants.h
- * Authors: David Butler and William Coar
+ * Authors: David Butler and Lillian Coar
  * Description: Constants used in the game
 */
 

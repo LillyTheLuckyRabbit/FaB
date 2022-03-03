@@ -1,5 +1,5 @@
 /* File: terrain.cpp
- * Authors: David Butler and William Coar
+ * Authors: David Butler and Lillian Coar
  * Description: Disjoint code based on disjoint set class from James Plank
  * The terrain class uses a vector to store and manipulate level data.
  * Moreover, the class uses disjoint sets for level generation (e.g., generating air pockets that connect all players)

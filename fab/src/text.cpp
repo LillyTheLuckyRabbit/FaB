@@ -1,5 +1,5 @@
 /* File: text.cpp
- * Authors: David Butler and William Coar
+ * Authors: David Butler and Lillian Coar
  * Description: The Text class deals with rendering text with a bitmap font.
 */
 

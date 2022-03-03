@@ -1,5 +1,5 @@
 /* File: game.cpp
-   Author: William Coar and David Butler
+   Author: Lillian Coar and David Butler
    Description: This file deals mainly with gameloop functions,
    such as rendering, updating terrain/players/bullets, and so on.
 */

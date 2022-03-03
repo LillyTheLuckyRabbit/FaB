@@ -1,5 +1,5 @@
 /* File: deltaclock.cpp
- * Authors: David Butler and William Coar
+ * Authors: David Butler and Lillian Coar
  * Description: Clock class used to calculate delta time. This keeps the game
  * consistent regardless of frame rate or monitor refresh rate.
 */

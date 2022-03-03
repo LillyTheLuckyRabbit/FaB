@@ -1,5 +1,5 @@
 /* File: common.h
- * Authors: David Butler and William Coar
+ * Authors: David Butler and Lillian Coar
  * Description: Common code shared between all files
 */
 

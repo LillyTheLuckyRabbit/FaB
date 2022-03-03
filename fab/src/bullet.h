@@ -1,5 +1,5 @@
 /* File: bullet.h
- * Authors: David Butler and William Coar
+ * Authors: David Butler and Lillian Coar
  * Description: This class contains the variables/functions used to create and move bullets.
  * Additionally, this file contains the weapons class, which handles reloading, shot delay, and passing variables to bullet.
 */

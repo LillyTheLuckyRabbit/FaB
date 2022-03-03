@@ -1,5 +1,5 @@
 /* File: angle.h
- * Authors: David Butler and William Coar
+ * Authors: David Butler and Lillian Coar
  * Description: Declarations for trigonometric functions.
 */
 #ifndef ANGLE_H
